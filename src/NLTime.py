@@ -93,7 +93,6 @@ def is_date(text):
         a, b, c = match.groups()
         # month-day-year and year-month-day
         for month, day, year in ((a, b, c), (b, c, a)):
-            print "mdy", month, day, year
             if month:
                 m = is_month(month)
             else:
@@ -430,7 +429,6 @@ class Segment(list):
                 diff = -1e10
             return (score, diff)
         parses = sorted(scores.items(), key=sortkey, reverse=True)
-        print "parses", parses
         return parses
 
 class SegmentInterpretation(tuple):
@@ -602,7 +600,6 @@ def parse(text):
                 print repr(p)
                 cur_segment.append(p)
             elif cur_segment:
-                # print "-- break --"
                 segments.append(cur_segment)
                 cur_segment = Segment()
             colno += len(word) + 1

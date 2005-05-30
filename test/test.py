@@ -1,8 +1,18 @@
+# so it can be run in the repo
+import sys
+sys.path.append('../src')
+
 from NLTime import parse
 from PartialTime import PartialTime
 from sets import Set
 import datetime
-from AIMA import *
+
+# we try to use the AIMA library, which provides some py2.4 support for
+# earlier Pythons
+try:
+    from AIMA import *
+except ImportError:
+    pass
 
 # string : list of required results or None
 test_cases = {
