@@ -3,6 +3,9 @@ import datetime, calendar
 from AIMA import every
 from Utility import make_attributes_from_args
     
+# TODO: actually, these should have min and max values and allow
+#       for min and max to be open or closed in addition to a single
+#       value mode where min=max
 class FuzzyValue:
     def __init__(self, value, direction=None):
         """direction is an operator like "<", "<=", ">=", ">", or None 

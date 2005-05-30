@@ -27,9 +27,9 @@ class TkTime(AutoscrollbarText):
             lambda evt: self.after(50, self.update_display), '+')
 
         self.tags = []
-    def display_parses(self, text):
+    def display_parses(self, text, force_update=False):
         sig = getsignature(text)
-        if sig == self.last_sig:
+        if sig == self.last_sig and not force_update:
             return
         else:
             self.last_sig = sig
@@ -96,8 +96,8 @@ class TkTime(AutoscrollbarText):
         if self.scheduled_update:
             self.after_cancel(self.scheduled_update)
         self.scheduled_update = self.after(50, self.update_display)
-    def update_display(self, *args):
-        self.display_parses(self.text.get('0.0', 'end'))
+    def update_display(self, force_update=False):
+        self.display_parses(self.text.get('0.0', 'end'), force_update)
 
 if __name__ == "__main__":
 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     def context_selector(segment, selection):
         if segment == 0:
             tktime.time_context = selection
-            tktime.update_display()
+            tktime.update_display(force_update=True)
             if selection:
                 contextlabel['text'] = "Context: " + str(selection)
             else:
