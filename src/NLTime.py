@@ -84,6 +84,9 @@ def is_month(text):
         return None
 
 def is_date(text):
+    if ordinals_re.search(text):
+        return None
+
     # remove trailing non-numbers
     text = nonint_end.sub('', text)
     text = nonint_start.sub('', text)
@@ -118,10 +121,6 @@ def is_date(text):
 
         return results or None
 
-
-
-
-
 def is_int(text):
     # remove trailing non-numbers
     text = nonint_end.sub('', text)
@@ -149,7 +148,7 @@ def is_day(text):
 def is_year(text):
     text = punc_start_re.sub('', text)
     text = punc_end_re.sub('', text)
-    if len(text) in (2, 4):
+    if len(text) in (2, 4) and not ordinals_re.search(text):
         i = is_int(text)
         if i is not None:
             if len(text) == 2:
