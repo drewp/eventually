@@ -164,7 +164,7 @@ def is_time(text):
 
     match = time_re.search(text)
     # 3pm (len 3) to 12:45:78pm (len 10)
-    if 2 < len(text) < 11 and match:
+    if 2 < len(text) < 11 and match and '/' not in text and '-' not in text:
         hour, minute, second, ampm = match.groups()
         # print "match", match.groups()
 
