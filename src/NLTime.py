@@ -2,9 +2,10 @@ import re, calendar, datetime
 from PartialTime import PartialTime
 from AIMA import *
 
-"""based on drewp's design which parsed words into these categories:
+"""
+Some notes for now:
+Based on drewp's design which parsed words into these categories:
 
----
              n - number
              y - year
              m - month (including abbreviations)
@@ -13,29 +14,17 @@ from AIMA import *
                  ones like '7:30')
              u - unknown (the default)
 
-dtparsable="dmnyt mnyt dmny dmn mny".split()
-
-dates = dayofweek month day year
-        dayofweek month day [current year, sanity check dayofweek=month+day]
-        dayofweek day
-        month day [current year]
-        month year
-        month
-        year
-times = time
-        time ampm
-datetimes = time [on] date
-            date [at] time
----
-
-We'll add (eventually):
+We also have:
 
              M - AM/PM
              z - timezone
              m - modifier ("next", "last", "this" -- needs a context)
              - - range marker ("-", "to", "until")
 
-default context is "now"
+And should add:
+
+             U - time unit ('week', 'hour', 'month' -- combine with relative
+                 and context)
 """
 
 days_of_week = [day.lower() for day in calendar.day_name]
@@ -150,7 +139,10 @@ def is_year(text):
     text = punc_end_re.sub('', text)
     if len(text) in (2, 4) and not ordinals_re.search(text):
         i = is_int(text)
-        if i is not None:
+        current_year = PartialTime.now().year
+        # we'll arbitrarily decide that we're not referring to years
+        # more than 200 years in the future
+        if i is not None and i < current_year + 200:
             if len(text) == 2:
                 return closest(2000, (2000 + i, 1900 + i))
             else:
