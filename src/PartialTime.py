@@ -66,7 +66,6 @@ class PartialTime:
         else:
             return True
 
-    # TODO autogenerate this method for all operations in getattr
     def __getattr__(self, attr):
         if attr in ('__add__', '__sub__', '__le__', '__lt__', '__eq__', 
                     '__ge__', '__gt__'):
@@ -83,21 +82,10 @@ class PartialTime:
         else:
             raise AttributeError("No such attribute: %r" % attr)
 
-    """
-    def __sub__(self, other):
-        self_dt = self.as_datetime()
-        other_dt = other.as_datetime()
-
-        if self_dt and other_dt:
-            return self_dt - other_dt
-        else:
-            raise TypeError("Insufficient information in the PartialTimes for '-' operation.")
-    """
-
     def copy(self):
         return PartialTime.from_object(self.__dict__)
     def combine(self, other):
-        # TODO FuzzyValues combine differently
+        # TODO FuzzyValues will combine differently
         c = self.copy()
         for attr in partialtime_attrs:
             try:
