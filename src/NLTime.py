@@ -175,8 +175,6 @@ def is_time(text):
 
         startswith0 = hour.startswith('0') and len(hour) == 2
 
-        # print 'split', hour, minute, ampm
-
         if not minute:
             minute = 0
         else:
