@@ -1,41 +1,15 @@
 import Tix as Tk
-
-def is_all_text_visible(text):
-    """Returns whether all text is visible in a Tk.Text.  The widget must
-    be update()d before this is called in order to be accurate."""
-    begin_visible = text.bbox("0.0")
-    end_visible = text.bbox("end - 1c")
-    return begin_visible and end_visible
+# TODO: more docs
+#       there are some bugs with delete_last_word, delete_word
 
 class BetterTextMixin:
-    """
-    # XXX these docs are wrong
-    Looks like an Tk entry widget. has extra key bindings. The
-    extra bindings are all things the entry can handle on its
-    own. Bindings such as <Return> (send message) will still be found
-    in TkConversation.__init__"""
-    def __init__(self, scrolledtext, **kwarg):
-        self.scrolledtext = scrolledtext
-        self.text = scrolledtext.text
-        self.autoscrollbars = kwarg.pop('autoscrollbars', None)
-
-        if self.autoscrollbars:
-            self.text.bind("<KeyRelease>", 
-                lambda event: self.auto_y_scrollbar())
-            self.text.bind("<<Paste>>", 
-                lambda event: self.text.after(50, self.auto_y_scrollbar))
-            self.text.bind("<<PasteSelection>>", 
-                lambda event: self.text.after(50, self.auto_y_scrollbar))
-
-            # we use a combination of Visibility and Expose to tell us about
-            # resizes
-            self.scrolledtext.bind("<Visibility>", 
-                lambda event: self.auto_y_scrollbar())
-            self.scrolledtext.bind("<Expose>", 
-                lambda event: self.auto_y_scrollbar())
+    """Currently a set of better keybindings and a new method (has_text)
+    for a Tk Text widget."""
+    def __init__(self, text):
+        self.text = text
 
         for evname in "<Prior> <Next> <Home> <End>".split():
-            self.scrolledtext.bind(evname, self.scroll_text)
+            self.text.bind(evname, self.scroll_text)
 
         # Shift-BackSpace is really called "Terminate_Server"
         # we convert this to a real backspace
@@ -119,25 +93,53 @@ class BetterTextMixin:
         We block this event and generate a real BackSpace one instead."""
         self.text.event_generate('<BackSpace>')
         return "break"
+
+    def has_text(self):
+        """Returns whether there is any non-whitespace text present."""
+        text = self.text.get('0.0', "end")
+        return text.strip()
+
+    def is_all_text_visible(self):
+        """Returns whether all text is visible in a Tk.Text.  The widget must
+        be update()d before this is called in order to be accurate."""
+        begin_visible = self.text.bbox("0.0")
+        end_visible = self.text.bbox("end - 1c")
+        return begin_visible and end_visible
+
+
+class AutoscrollbarText(Tk.ScrolledText, BetterTextMixin):
+    def __init__(self, *args, **kw):
+        Tk.ScrolledText.__init__(self, *args, **kw)
+        BetterTextMixin.__init__(self, self.text)
+
+        self.text.bind("<KeyRelease>", 
+            lambda event: self.auto_y_scrollbar())
+        self.text.bind("<<Paste>>", 
+            lambda event: self.text.after(50, self.auto_y_scrollbar))
+        self.text.bind("<<PasteSelection>>", 
+            lambda event: self.text.after(50, self.auto_y_scrollbar))
+
+        # we use a combination of Visibility and Expose to tell us about
+        # resizes
+        self.bind("<Visibility>", 
+            lambda event: self.auto_y_scrollbar())
+        self.bind("<Expose>", 
+            lambda event: self.auto_y_scrollbar())
     def auto_y_scrollbar(self):
         """Emulates -scrollbar "auto -x" (automatic Y, don't show X)
         since Tk.Text doesn't seem to want to do that for us.  This means
         we show the scrollbar if we can't see the beginning or the end."""
         self.text.update()
-        if is_all_text_visible(self.text):
-            self.scrolledtext['scrollbar'] = 'none'
+        if self.is_all_text_visible():
+            self['scrollbar'] = 'none'
         else:
-            self.scrolledtext['scrollbar'] = 'y'
+            self['scrollbar'] = 'y'
 
-    def has_text(self):
-        """Returns whether there is any non-whitespace text present"""
-        text = self.text.get('0.0', "end")
-        return text.strip()
-
-class AutoexpandText(Tk.Text):
+class AutoexpandText(Tk.Text, BetterTextMixin):
     def __init__(self, *arg, **kwarg):
         self.height_boundaries = kwarg.pop('height_boundaries', (1, None))
         Tk.Text.__init__(self, *arg, **kwarg)
+        BetterTextMixin.__init__(self, self)
 
         self.bind("<KeyRelease>", self.expand_height)
         self.bind("<<Paste>>", 
@@ -187,7 +189,7 @@ class AutoexpandText(Tk.Text):
 
         # now we keep incrementing the height until we can see everything.
         # this causes flashing, so we avoid it as much as possible
-        while not is_all_text_visible(self):
+        while not self.is_all_text_visible():
             # increment height but keep boundaries
             height = max(int(self['height']) + 10, minheight)
             if maxheight is not None:
@@ -201,19 +203,15 @@ class AutoexpandText(Tk.Text):
 if __name__ == "__main__":
     root = Tk.Tk()
 
-    t = Tk.ScrolledText(root)
-    t = AutoexpandText(root, height_boundaries=(10, 20))
-    # BetterTextMixin(t, autoscrollbars=True)
-    
     if 0:
-        if 0:
-            t = BetterText(root, autoexpand=True, height_boundaries=(5,10),
-                autoscrollbars=True)
-        elif 0:
-            t = BetterText(root, autoscrollbars=True)
-        else:
-            t = BetterText(root, autoexpand=True, scrollbar='none')
-
+        t = AutoexpandText(root, height_boundaries=(10, 20))
+    elif 1:
+        t = AutoscrollbarText(root)
+    else:
+        # one way to get better behavior without inheritance
+        t = Tk.ScrolledText(root, scrollbar='none')
+        BetterTextMixin(t.text)
+    
     t.pack(fill='both', expand=0)
 
     Tk.mainloop()
