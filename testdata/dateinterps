@@ -1,0 +1,33 @@
+
+parse FRI JUL 19 2002:
+"%(date1)s" % {'date1': DateTime('2002/07/19')}
+
+parse THU JUL 19 2002:
+"%(date1)s" % {'date1': DateTime('2002/07/19')}
+
+parse DEPARTURE ON FRI JUL 19 2002:
+"DEPARTURE ON %(date1)s" % {'date1': DateTime('2002/07/19')}
+
+parse July 19, 2002, 5:30pm:
+"%(date1)s" % {'date1': DateTime('2002/07/19 17:30:00 GMT-7')}
+
+parse Departs **July 19, 2002** 5:30pm:
+"Departs **%(date1)s" % {'date1': DateTime('2002/07/19 17:30:00 GMT-7')}
+
+parse July 19, 2002 25:30pm:
+"%(date1)s %(time1)s" % {'date1': DateTime('2002/07/19'), 'time1': '<parsed time 25:30pm>'}
+
+parse Smarch 19, 2002 5:30pm:
+"Smarch 19, 2002 %(time1)s" % {'time1': '<parsed time 5:30pm>'}
+
+parse ISSUED 0CT 2002:
+"ISSUED 0CT 2002" % {}
+
+parse EVENING TOUR 6:20PM - 8:45PM:
+"EVENING TOUR %(time1)s - %(time2)s" % {'time1': '<parsed time 6:20PM>', 'time2': '<parsed time 8:45PM>'}
+
+parse 7:30 7:30am 7:30 am 7:30 a.m.:
+"%(time1)s %(time2)s %(time3)s am %(time4)s a.m." % {'time4': '<parsed time 7:30>', 'time1': '<parsed time 7:30>', 'time2': '<parsed time 7:30am>', 'time3': '<parsed time 7:30>'}
+
+parse 'feb 12 2002' not 'feb 13 2002':
+"'%(date1)s' not '%(date2)s'" % {'date1': DateTime('2002/02/12'), 'date2': DateTime('2002/02/13')}

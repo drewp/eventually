@@ -1,0 +1,112 @@
+From: Genie deGouveia <egd@cs.brown.edu>
+To: announce@cs.brown.edu
+Date: May 20, 2005 10:22 AM
+Subject: [Announce] Brown CS Seminar: Russ Miller in Room 368 (CIT 3rd floor) today at noon
+
+Seminar
+
+BROWN UNIVERSITY
+Computer Science Department
+
+Russ Miller
+Distinguished Professor, Department of Computer Science &
+Engineering, Suny-Buffalo
+
+Friday, May 20, 2005 at noon
+Room 368 (CIT 3rd floor)
+Refreshments will be served at 11:45 am
+
+Molecular Structure Determination and the ACDC Computational and Data Grid
+
+In this talk, I present an overview of our design and implementation
+of the ACDC-Grid, an extensive, multi-institutional proof-of-concept
+grid that I have implemented in New York State.  This includes efforts
+in grid monitoring, predictive scheduling, grid-enabling application
+templates, backfill detection and optimization, data repositories and
+operations, dynamic and automated allocation of resources, and dynamic
+firewall, to name a few.
+
+Further, I will discuss the functionality of the ACDC-Grid that
+enables a cost-effective and transparent solution to a critical
+application that I have developed to solve a key problem in structural
+biology.  This application (SnB) is used to determine molecular
+structures from X-ray crystallographic data.  The grid-based
+implementation includes grid-enabled optimization via data
+repositories, data mining, and intelligent generation of jobs to be
+run by the daemon overseeing the parameter optimization routine.
+
+SnB is a computer program based on our Shake-and-Bake method of
+molecular crystal structure determination.  It is the program of
+choice for structure determination in many of the 500 laboratories
+that have acquired it. This computationally-intensive procedure can
+exploit the ACDC-Grid due to its ability to present the user with a
+large computational infrastructure that will allow for the processing
+of a large number of related molecular trial structures.
+
+The SnB program uses a dual-space direct-methods procedure for
+determining crystal structures from X-ray diffraction data. This
+program has been used in a routine fashion to solve difficult atomic
+resolution structures, containing as many as 1000 unique non-hydrogen
+atoms, which could not be solved by traditional reciprocal-space
+routines. Recently, the focus of the Shake-and-Bake research team has
+been on the application of SnB to solve heavy-atom and anomalous
+scattering substructures of much larger proteins provided that 3-4A
+diffraction data can be measured. In fact, while traditional direct
+methods had been successfully applied to substructures containing on
+the order of a dozen selenium sites, SnB has been used to determine as
+many as 180 selenium sites. Such solutions have led to the
+determination of complete structures as large as 567 kDa.
+
+The Shake-and-Bake procedure consists of generating structure
+invariants and coordinates for random-atom trial structures. Each such
+trial structure is subjected to a cyclical automated procedure that
+includes computing a Fourier transform to determine phase values from
+a proposed set of atoms (initially random), determining a
+figure-of-merit, refining phases to locally optimize the
+figure-of-merit, computing a Fourier transform to produce an electron
+density map, and employing a peak-picking routine toexamine the map
+and determine the maxima. These peaks are then considered to beatoms,
+and the cyclical process is repeated for a predetermined (by the user)
+number of cycles.
+
+The running time of this procedure ranges from minutes on PCs to
+months on supercomputers. Trial structures are continually and
+simultaneously processed, with the final figure-of-merit values of
+each structure stored in a file. The user can review a dynamic
+histogram during the processing of the trials in order to determine
+whether or not a solution is likely present in the set of completed
+trial structures.
+
+The Shake-and-Bake procedure was listed on the IEEE Poster ``Top
+Algorithms of the [20th] Century'' and key components of the ACDC-Grid
+have been incorporated into Grid3, Grid3+, and the Open Science Grid
+(OSG), to name a few.
+
+This talk represents joint work with Herb Hauptman, George DeTitta,
+Chuck Weeks, Bill Furey, Mark Green, Dave Pape, Cathy Ruby, Amin
+Ghadersohi, Naimesh Shah, Steve Gallo, Jason Rappleye, Jon Bednaxz,
+Sam Guerci,Martins Innus, Cynthia Cornelius, and Steve Potter, to name
+a few.
+
+Information about Shake-and-Bake is available at www.hwi.buffalo.edu
+(Crystallographic Methods)
+
+Information about the ACDC-Grid is available at www.ccr.buffalo.edu
+(Projects/Grid Computing)
+
+The live dashboard is available at http://osg.ccr.buffalo.edu
+
+Russ Miller's web site can be found at
+www.cse.buffalo.edu/faculty/miller
+
+Russ Miller directs the Center for Computational Research, which can
+be found at www.ccr.buffalo.edu
+
+Host: Professor Eli Upfal
+
+
+
+_______________________________________________
+Announce mailing list
+Announce@list.cs.brown.edu
+http://list.cs.brown.edu/mailman/listinfo/announce
