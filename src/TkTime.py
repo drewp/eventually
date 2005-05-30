@@ -75,7 +75,6 @@ class TkTime(AutoscrollbarText):
                 self.text.tag_config(tag, relief='raised')
 
         for parse, score in valid_parses[:20]:
-            # popup.add_command(label=str(parse), command=lambda: select(parse))
             popup.add_command(label="%s (%s)" % (parse, score), 
                 command=lambda parse=parse: select(parse))
 

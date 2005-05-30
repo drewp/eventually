@@ -68,7 +68,7 @@ except NameError:
         >>> sorted([3, 1, 2])
         [1, 2, 3]
         """     
-        seq2 = copy.copy(seq)
+        seq2 = list(seq)
         seq2.sort(_make_cmp(cmp, key))
         if reverse: 
             seq2.reverse() 
