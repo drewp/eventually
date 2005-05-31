@@ -90,6 +90,45 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     # XXX this is really a range
     """We'll be having a special meeting of BLLIP Fri 5/27 11-1 in CIT345.
     Let's be punctual for once. :)""" : datetime.datetime(2005, 5, 27, 11, 0),
+
+    """From:    "George B. Loriot" <George_Loriot@Brown.EDU>
+    To:      4th Year Students, Graduate Students, Medical Students, 
+             All Faculty, Exempt Staff, Non-Exempt Staff
+    Subject: Reminder: Scientific Watercooler today at 4:00
+
+    Reminder that the 'Scientific Watercooler', hosted by CCV, we be held
+    today (Tuesday, 5/31) at 4:00 in the CIT boardroom.  This month,
+    Physics Professor Brad Marston will discus his research on nonlinear
+    systems using Objective-C and Apple's Cocoa development environment.
+    Details are at the URL below.
+
+    The Scientific Watercoolers are open to the public; anyone with an
+    interest in scientific computing is invited to attend.  An informal
+    discussion will follow the presentation.""" : 
+        datetime.datetime(2005, 5, 31, 16, 0),
+
+    "On 5/27/05, Robert Lynch <robert.ly...@gmail.com> wrote:" :
+        datetime.datetime(2005, 5, 27),
+
+    # XXX another tricky range one
+    """ACM SIGGRAPH, SIGCHI and AIGA have announced the 2nd international DUX
+    conference, "Designing for User Experiences", will take place 3-5
+    November, in San Francisco, CA at the beautiful Fort Mason Center. The San
+    """ : None,
+
+    "On May 27, 2005, at 11:08 AM," : datetime.datetime(2005, 5, 27, 11, 8),
+
+    """2005/6/16 night
+    2005/6/17 morning, no night
+    2005/6/18 night show
+    2005/6/19 14:00-23:00 show""" : 
+        [datetime.datetime(2005, 6, 16),
+         datetime.datetime(2005, 6, 17),
+         datetime.datetime(2005, 6, 18),
+         # XXX this last one should be a range
+         datetime.datetime(2005, 6, 19, 14, 0)],
+            
+    
 }
 # so the test cases have a consistent ordering
 test_cases = test_cases.items()
