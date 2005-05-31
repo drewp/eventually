@@ -319,12 +319,12 @@ common_orders = [
 common_orders = [tuple(order.split()) for order in common_orders]
 
 class ParsedWord:
-    def __init__(self, word, lineno=None, colno=None, wordno=None, 
+    def __init__(self, word, linenum=None, colnum=None, wordnum=None, 
         parsers=None):
         self.originalword = word
-        self.lineno = lineno
-        self.colno = colno
-        self.wordno = wordno
+        self.linenum = linenum
+        self.colnum = colnum
+        self.wordnum = wordnum
         self.parsers = parsers or all_parsers
 
         self.parses = []
@@ -357,8 +357,8 @@ class ParsedWord:
     def __str__(self):
         return self.originalword
     def __repr__(self):
-        return "<Node %r %d:%d %s>" % (self.originalword, self.lineno, 
-                                       self.wordno, str(self.parses))
+        return "<Node %r %d:%d %s>" % (self.originalword, self.linenum, 
+                                       self.wordnum, str(self.parses))
 
 class Segment(list):
     """A consequtive sequence of ParsedWord objects.  Subclass of a list,
@@ -369,8 +369,8 @@ class Segment(list):
     def extent(self):
         """Returns the start and end line:column for this segment."""
         first, last = self[0], self[-1]
-        return ((first.lineno + 1, first.colno), 
-                (last.lineno + 1, last.colno + len(str(last))))
+        return ((first.linenum + 1, first.colnum), 
+                (last.linenum + 1, last.colnum + len(str(last))))
     def just_hints(self):
         for word in self:
             if not (word.is_only_relative() or word.is_only_hint()):
@@ -591,26 +591,26 @@ def cartesianproduct(lists, keep_func=None):
 def parse(text):
     segments = []
     cur_segment = Segment()
-    for lineno, line in enumerate(text.splitlines()):
+    for linenum, line in enumerate(text.splitlines()):
         if cur_segment:
             # new segment per line
             segments.append(cur_segment)
             cur_segment = Segment()
-        colno = 0
-        wordno = 0
+        colnum = 0
+        wordnum = 0
         for word in ws_split.split(line):
             if not word:
-                colno += 1
+                colnum += 1
                 continue
 
-            p = ParsedWord(word, lineno, colno, wordno)
+            p = ParsedWord(word, linenum, colnum, wordnum)
             if p.parses:
                 cur_segment.append(p)
             elif cur_segment:
                 segments.append(cur_segment)
                 cur_segment = Segment()
-            colno += len(word) + 1
-            wordno += 1
+            colnum += len(word) + 1
+            wordnum += 1
 
     if cur_segment:
         segments.append(cur_segment)
