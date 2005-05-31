@@ -95,16 +95,6 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
 test_cases = test_cases.items()
 test_cases.sort()
 
-# TODO top priority is making grammars!!!
-# and range objects (which are just 2 times/dates/datetimes)
-# datetime + datetime
-# date + date
-# time + time
-# datetime + date (time from first or open ended)
-# datetime + time (if time2 is after time1, could be a day/month after)
-#   i.e. (5/27 9pm) - 1am
-#           dt         t
-
 verbose = False
 ranks = []
 failed_tests = 0
@@ -113,10 +103,10 @@ for test_case, expected_results in test_cases:
     # hasn't been built yet)
     if not expected_results:
         continue
+    # listify the test case if we haven't already
     if not isinstance(expected_results, (list, tuple)):
         expected_results = [expected_results,]
 
-    # expected_results = list(expected_results) # we're going to modify it
     expected_results = [PartialTime.from_object(res) 
         for res in expected_results]
     unmatched_results = list(expected_results) # a copy that we'll modify

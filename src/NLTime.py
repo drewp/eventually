@@ -2,6 +2,15 @@ import re, calendar, datetime
 from PartialTime import PartialTime
 from AIMA import *
 
+# TODO make range objects (which are just 2 times/dates/datetimes)
+# datetime + datetime
+# date + date
+# time + time
+# datetime + date (time from first or open ended)
+# datetime + time (if time2 is after time1, could be a day/month after)
+#   i.e. (5/27 9pm) - 1am
+#           dt         t
+
 """
 Some notes for now:
 Based on drewp's design which parsed words into these categories:
@@ -42,8 +51,9 @@ ws_split = re.compile(r'\s')
 
 ordinals_re = re.compile(r'st|nd|rd|th', re.I)
 time_re = re.compile(r'(\d{1,2})(?:\:?(\d+))?(?:\:?(\d+))?\s*([AP]M)?(?!th)(?!rd)(?!st)', re.I)
-# 5/27
-# 6.01.2004
+
+# Some date examples:
+# 5/27, 6.01.2004, 6.1.2004, 1-2-1981, 1-2-03
 date_re = re.compile(r'(\d{1,4})[\./\-](\d{1,4})(?:[\./\-](\d{1,4}))?')
 
 def closest(center, points):
@@ -351,6 +361,9 @@ class ParsedWord:
 class Segment(list):
     """A consequtive sequence of ParsedWord objects.  Subclass of a list,
     so all list methods will work."""
+    def __str__(self):
+        """Returns a string of all words in this Segment."""
+        return ' '.join([parsedword.originalword for parsedword in self])
     def extent(self):
         """Returns the start and end line:column for this segment."""
         first, last = self[0], self[-1]
