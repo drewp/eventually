@@ -1,0 +1,9 @@
+- range support
+- piece-parsers (is_year(), etc.) should be able to provide scores to
+  allow (2:00 to be a more likely time than 200)
+- Input:
+    o email
+- Output:
+    o vcal/ical (maybe: http://python.org/pypi/vcalsax/0.4.0
+      and http://savannah.nongnu.org/cgi-bin/viewcvs/python-pdi/python-pdi)
+    o RDF-Event (see http://www.w3.org/2002/12/cal/)
