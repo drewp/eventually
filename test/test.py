@@ -40,7 +40,8 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     for the summer" party!
 
     It's at my apartment, 203 Camp Street. And no, it's not a surprise, so you
-    don't need to be all secretive about it...""" : datetime.datetime(2005, 5, 23, 20, 0),
+    don't need to be all secretive about it...""" : 
+        datetime.datetime(2005, 5, 23, 20, 0),
 
     """Friday, 03 Jun 05 	Flight DH 1640 	
     Depart: 	Providence, RI (PVD) 	5:04 pm 	
@@ -90,6 +91,9 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     """We'll be having a special meeting of BLLIP Fri 5/27 11-1 in CIT345.
     Let's be punctual for once. :)""" : datetime.datetime(2005, 5, 27, 11, 0),
 }
+# so the test cases have a consistent ordering
+test_cases = test_cases.items()
+test_cases.sort()
 
 # TODO top priority is making grammars!!!
 # and range objects (which are just 2 times/dates/datetimes)
@@ -101,7 +105,12 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
 #   i.e. (5/27 9pm) - 1am
 #           dt         t
 
-for test_case, expected_results in test_cases.items():
+verbose = False
+ranks = []
+failed_tests = 0
+for test_case, expected_results in test_cases:
+    # we don't have a result for this yet (maybe because the result object
+    # hasn't been built yet)
     if not expected_results:
         continue
     if not isinstance(expected_results, (list, tuple)):
@@ -110,24 +119,47 @@ for test_case, expected_results in test_cases.items():
     # expected_results = list(expected_results) # we're going to modify it
     expected_results = [PartialTime.from_object(res) 
         for res in expected_results]
+    unmatched_results = list(expected_results) # a copy that we'll modify
 
-    print "Test case:"
-    print test_case
     segments = parse(test_case)
     for segment in segments:
         seg_results = segment.valid_parses()
         if seg_results:
-            for result, score in seg_results[:20]:
-                print score, str(result),
-                if result in expected_results:
-                    expected_results.remove(result)
-                    print "<=="
-                else:
-                    print
+            for rank, (result, score) in enumerate(seg_results[:20]):
+                if result in unmatched_results:
+                    unmatched_results.remove(result)
+                    ranks.append(rank)
 
-            print
+    if unmatched_results or verbose:
+        if unmatched_results:
+            failed_tests += 1
+        print "Test case:"
+        print repr(test_case)
+        print
+        for num, segment in enumerate(segments):
+            print "Segment %d:" % num
+            print str(segment)
+            for parsedword in segment:
+                print repr(parsedword)
 
-    if expected_results:
+            seg_results = segment.valid_parses()
+            if seg_results:
+                for result, score in seg_results[:20]:
+                    print "%s\t%s" % (score, result),
+                    if result in expected_results:
+                        print "<=="
+                    else:
+                        print
+                print
+
         print "Unmatched results:", expected_results
+        print "========================="
 
-    print "========================="
+print "Summary:"
+print "Ran %d tests, %d failed." % (len(test_cases), failed_tests)
+# this tells us how well it is doing for the answers that it did find
+average = sum(ranks) / float(len(ranks))
+print "Average rank: %.5f" % average
+print "Median rank: %.5f, stddev %.5f" % (median(ranks), 
+                                          stddev(ranks, meanval=average))
+print "Worst rank: %s" % max(ranks)

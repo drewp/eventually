@@ -586,7 +586,6 @@ def parse(text):
 
             p = ParsedWord(word, lineno, colno, wordno)
             if p.parses:
-                print repr(p)
                 cur_segment.append(p)
             elif cur_segment:
                 segments.append(cur_segment)
