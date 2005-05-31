@@ -215,7 +215,7 @@ def is_time(text):
         text = punc_re.sub('', text)
         if text == 'noon':
             return datetime.time(12)
-        elif text == 'midnight': # XXX this is broken
+        elif text == 'midnight':
             return datetime.time(0)
 
         return None

@@ -37,7 +37,7 @@ class PartialTime:
         d = self.as_date()
         t = self.as_time()
 
-        if d and t:
+        if d and (t or (self.hour == 0 and self.minute == 0)):
             return "%s %s" % (d, t)
         elif d or t:
             return str(d or t)
@@ -89,7 +89,11 @@ class PartialTime:
         c = self.copy()
         for attr in partialtime_attrs:
             try:
-                setattr(c, attr, getattr(self, attr) or getattr(other, attr))
+                ourattr = getattr(self, attr)
+                if ourattr is not None:
+                    setattr(c, attr, ourattr)
+                else:
+                    setattr(c, attr, getattr(other, attr))
             except AttributeError:
                 pass
 
@@ -157,7 +161,7 @@ class PartialTime:
         dt = None
         d = self.as_date()
         if d:
-            t = self.as_time() or datetime.time()
+            t = self.as_time()
             dt = datetime.datetime.combine(d, t)
 
         return dt
