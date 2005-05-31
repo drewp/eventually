@@ -1,6 +1,9 @@
 - range support
+- timezone support
+- test cases should be able to specify a context
 - piece-parsers (is_year(), etc.) should be able to provide scores to
   allow (2:00 to be a more likely time than 200)
+- ability to split segments
 - Input:
     o email
 - Output:

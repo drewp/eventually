@@ -21,13 +21,13 @@ Based on drewp's design which parsed words into these categories:
              d - day-of-week
              t - time-of-day (some parsable time, including ambiguous
                  ones like '7:30')
-             u - unknown (the default)
+             u - unknown (the default) (these are skipped)
 
 We also have:
 
              M - AM/PM
              z - timezone
-             m - modifier ("next", "last", "this" -- needs a context)
+             r - relative marker ("next", "last", "this" -- needs a context)
              - - range marker ("-", "to", "until")
 
 And should add:
@@ -262,6 +262,8 @@ def is_lochint(text):
         return text
 
 def is_relative(text):
+    """Returns a normalized relative marker if text contains one.  Relative
+    markers require a context (and possibly more information) to evaluate."""
     text = text.lower()
     text = punc_re.sub('', text)
     # TODO list more ordinals?
@@ -399,16 +401,13 @@ class Segment(list):
 
         context = context or PartialTime.now()
 
-        # for node in self:
-            # print repr(node)
-        
         interpretable_parses = []
         all_parses = cartesianproduct([node.parses for node in self], 
                                       self.all_compatible)
         for interp in all_parses:
             # print "interp", interp
             interp = SegmentInterpretation(interp)
-            interp.set_segment(self)
+            interp.segment = self
             score, result = interp.score(context)
             # print "score", score
             # print "result", repr(result)
@@ -438,15 +437,16 @@ class SegmentInterpretation(tuple):
         tuple.__init__(self, *args)
         self.parsedict = dict(self)
         self.segment = None
-    def set_segment(self, segment):
-        self.segment = segment
     def grammar_score(self):
         ourorder = tuple([parser for parser, val in self])
+        # we might want to make some grammars worth more than others at some
+        # point
         if ourorder in common_orders:
             return 5
         else:
             return 0
     def score(self, context):
+        """Return the score of this SegmentInterpretation given a context."""
         result = self.convert_parse_to_date_and_time(context)
         if not result:
             return (0, result)
@@ -488,9 +488,14 @@ class SegmentInterpretation(tuple):
         return score, result
 
     def convert_parse_to_date_and_time(self, context):
+        """In this method, we attempt to convert this SegmentInterpretation
+        into a PartialTime.  We use context to try to fill in missing
+        information.  Relative markers are expanded here."""
+        # fill in the current year if we don't have it but have part of a date
         if 'month' in self.parsedict:
             if not 'year' in self.parsedict:
                 self.parsedict['year'] = context.year
+        # fill in 0 for the minute if we have part of a time
         if 'hour' in self.parsedict:
             if not 'minute' in self.parsedict:
                 self.parsedict['minute'] = 0
@@ -516,12 +521,13 @@ class SegmentInterpretation(tuple):
             except AttributeError:
                 pass
 
+        # relative day of week expansion ("this monday", "next tuesday", etc.)
         without_dow = self.parsedict.copy()
         dow = without_dow.pop('dayofweek', None)
+        # if we have a dayofweek but no date elements
         if dow and not (without_dow.get('year') or \
                         without_dow.get('month') or \
                         without_dow.get('day')):
-            # if we're just a dayofweek and a rel or just a dayofweek
             rel = self.parsedict.get('relative', 'this')
 
             try:
