@@ -136,12 +136,15 @@ test_cases.sort()
 
 verbose = False
 ranks = []
-failed_tests = 0
+num_tests_failed = 0
+num_tests_run = 0
 for test_case, expected_results in test_cases:
     # we don't have a result for this yet (maybe because the result object
     # hasn't been built yet)
     if not expected_results:
         continue
+
+    num_tests_run += 1
     # listify the test case if we haven't already
     if not isinstance(expected_results, (list, tuple)):
         expected_results = [expected_results,]
@@ -161,7 +164,7 @@ for test_case, expected_results in test_cases:
 
     if unmatched_results or verbose:
         if unmatched_results:
-            failed_tests += 1
+            num_tests_failed += 1
         print "Test case:"
         print repr(test_case)
         print
@@ -181,11 +184,11 @@ for test_case, expected_results in test_cases:
                         print
                 print
 
-        print "Unmatched results:", expected_results
+        print "Unmatched results:", unmatched_results
         print "========================="
 
 print "Summary:"
-print "Ran %d tests, %d failed." % (len(test_cases), failed_tests)
+print "Ran %d tests, %d failed." % (num_tests_run, num_tests_failed)
 # this tells us how well it is doing for the answers that it did find
 average = sum(ranks) / float(len(ranks))
 print "Average rank: %.5f" % average
