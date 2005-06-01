@@ -128,23 +128,41 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
          # XXX this last one should be a range
          datetime.datetime(2005, 6, 19, 14, 0)],
             
-    
+    "29 May 2005 10:05:19 -0700" : datetime.datetime(2005, 5, 29, 10, 5, 19),
+
+    "Delivery estimate: July 19, 2004" : datetime.date(2004, 7, 19),
+
+    "Departs **July 19, 2002** 5:30pm" : datetime.datetime(2002, 7, 19, 17, 30),
+
+    "Smarch 19, 2002 5:30pm" : datetime.time(17, 30),
+
+    "ISSUED OCT 2002" : PartialTime(year=2002, month=10),
+
+    "7:30 a.m." : datetime.time(7, 30),
+    "7:30a.m." : datetime.time(7, 30),
+    "7:30 p.m." : datetime.time(19, 30),
+    "7:30p.m." : datetime.time(19, 30),
+
+    'feb 12 2002' : datetime.date(2002, 2, 12),
 }
 # so the test cases have a consistent ordering
 test_cases = test_cases.items()
 test_cases.sort()
 
 verbose = False
+summary_only = False
+
 ranks = []
 num_tests_failed = 0
 num_tests_run = 0
+num_segments_failed = 0
+num_segments_run = 0
 for test_case, expected_results in test_cases:
-    # we don't have a result for this yet (maybe because the result object
-    # hasn't been built yet)
+    # we don't have a result for this yet (maybe because the type of the
+    # result object hasn't been built yet, e.g. ranges)
     if not expected_results:
         continue
 
-    num_tests_run += 1
     # listify the test case if we haven't already
     if not isinstance(expected_results, (list, tuple)):
         expected_results = [expected_results,]
@@ -152,6 +170,9 @@ for test_case, expected_results in test_cases:
     expected_results = [PartialTime.from_object(res) 
         for res in expected_results]
     unmatched_results = list(expected_results) # a copy that we'll modify
+
+    num_tests_run += 1
+    num_segments_run += len(expected_results)
 
     segments = parse(test_case)
     for segment in segments:
@@ -162,9 +183,13 @@ for test_case, expected_results in test_cases:
                     unmatched_results.remove(result)
                     ranks.append(rank)
 
+    num_segments_failed += len(unmatched_results)
+
     if unmatched_results or verbose:
         if unmatched_results:
             num_tests_failed += 1
+        if summary_only:
+            continue
         print "Test case:"
         print repr(test_case)
         print
@@ -189,9 +214,10 @@ for test_case, expected_results in test_cases:
 
 print "Summary:"
 print "Ran %d tests, %d failed." % (num_tests_run, num_tests_failed)
+print "Ran %d segment tests, %d failed." % (num_segments_run, 
+                                            num_segments_failed)
 # this tells us how well it is doing for the answers that it did find
 average = sum(ranks) / float(len(ranks))
-print "Average rank: %.5f" % average
-print "Median rank: %.5f, stddev %.5f" % (median(ranks), 
-                                          stddev(ranks, meanval=average))
-print "Worst rank: %s" % max(ranks)
+print 'Distribution:', ', '.join([str(pair) for pair in histogram(ranks)])
+print "Average rank: %.5f, stddev %.5f" % (average,
+                                           stddev(ranks, meanval=average))
