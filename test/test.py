@@ -149,6 +149,8 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     'tomorrow' : now.as_date() + datetime.timedelta(days=1),
     'yesterday' : now.as_date() - datetime.timedelta(days=1),
     'today' : now.as_date(),
+    'now' : now,
+    'tomorrow at 3pm' : datetime.datetime.combine(now.as_date() + datetime.timedelta(days=1), datetime.time(15, 0)),
 }
 # so the test cases have a consistent ordering
 test_cases = test_cases.items()
@@ -181,7 +183,7 @@ for test_case, expected_results in test_cases:
 
     segments = parse(test_case)
     for segment in segments:
-        seg_results = segment.valid_parses()
+        seg_results = segment.valid_parses(context=now)
         if seg_results:
             for rank, (result, score) in enumerate(seg_results[:20]):
                 if result in unmatched_results:

@@ -535,6 +535,9 @@ class SegmentInterpretation(tuple):
         if 'relative' in self.parsedict:
             rel = self.parsedict['relative']
             try:
+                if rel == 'now':
+                    return context
+
                 day_offset = ['yesterday', 'today', 'tomorrow'].index(rel) - 1
                 day_delta = datetime.timedelta(days=day_offset)
                 return PartialTime.from_object(context.as_date() + day_delta)
