@@ -14,6 +14,7 @@ try:
 except ImportError:
     pass
 
+now = PartialTime.now()
 # string : list of required results or None
 test_cases = {
     "Jan 3rd" : datetime.date(2005, 1, 3),
@@ -144,6 +145,10 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     "7:30p.m." : datetime.time(19, 30),
 
     'feb 12 2002' : datetime.date(2002, 2, 12),
+
+    'tomorrow' : now.as_date() + datetime.timedelta(days=1),
+    'yesterday' : now.as_date() - datetime.timedelta(days=1),
+    'today' : now.as_date(),
 }
 # so the test cases have a consistent ordering
 test_cases = test_cases.items()

@@ -271,7 +271,9 @@ def is_relative(text):
     text = punc_re.sub('', text)
     # TODO list more ordinals?
     if text in ['next', 'last', 'this', 'upcoming', 'previous', 'following',
-                'first', 'second', 'third', 'fourth', 'fifth']:
+                'first', 'second', 'third', 'fourth', 'fifth', "today", 
+                "tomorrow", "yesterday", "morning", "afternoon", "evening",
+                "now"]:
         # normalize some of these
         text = text.replace('following', 'next')
         text = text.replace('upcoming', 'this')
@@ -398,10 +400,6 @@ class Segment(list):
     def valid_parses(self, context=None):
         """Returns all valid parses and their score, ordered by score.
         ((parse1, score1), (parse2, score2), ...)"""
-        # these can be skipped
-        if len(self) == 1 and self.just_hints():
-            return None
-
         context = context or PartialTime.now()
 
         interpretable_parses = []
@@ -524,7 +522,30 @@ class SegmentInterpretation(tuple):
             except AttributeError:
                 pass
 
-        # relative day of week expansion ("this monday", "next tuesday", etc.)
+        for expfunc in (self.expand_day_relatives, 
+                          self.expand_dayofweek_with_relatives):
+            expansion = expfunc(context)
+            if expansion is not None:
+                return expansion
+        else:
+            pt = PartialTime.from_object(self.parsedict)
+            return pt
+    def expand_day_relatives(self, context):
+        """Expands 'yesterday', 'today', 'tomorrow', and 'now'."""
+        if 'relative' in self.parsedict:
+            rel = self.parsedict['relative']
+            try:
+                day_offset = ['yesterday', 'today', 'tomorrow'].index(rel) - 1
+                day_delta = datetime.timedelta(days=day_offset)
+                return PartialTime.from_object(context.as_date() + day_delta)
+            except ValueError:
+                pass
+
+        return None
+
+    def expand_dayofweek_with_relatives(self, context):
+        """Perform a day of week expansion given a relative ("this
+        monday", "next tuesday", etc.)"""
         without_dow = self.parsedict.copy()
         dow = without_dow.pop('dayofweek', None)
         # if we have a dayofweek but no date elements
@@ -545,8 +566,7 @@ class SegmentInterpretation(tuple):
             except ValueError:
                 pass
 
-        pt = PartialTime.from_object(self.parsedict)
-        return pt
+        return None
 
 # TODO mostly replaced with PartialTime.is_valid
 def pieces_compatible(piece1, piece2):
