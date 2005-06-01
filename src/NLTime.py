@@ -42,7 +42,7 @@ month_names = [month.lower() for month in calendar.month_name]
 nonint_start = re.compile(r'^[^\d]+')
 nonint_end = re.compile(r'[^\d]+$')
 
-punc = r'[\.\,;:\'"\(\)]'
+punc = r'[\.\,;:\'"\(\)\*]'
 punc_re = re.compile(r'%s+' % punc)
 punc_start_re = re.compile(r'^%s+' % punc)
 punc_end_re = re.compile(r'%s+$' % punc)
@@ -50,7 +50,7 @@ punc_end_re = re.compile(r'%s+$' % punc)
 ws_split = re.compile(r'\s')
 
 ordinals_re = re.compile(r'st|nd|rd|th', re.I)
-time_re = re.compile(r'(\d{1,2})(?:\:?(\d+))?(?:\:?(\d+))?\s*([AP]M)?(?!th)(?!rd)(?!st)', re.I)
+time_re = re.compile(r'(\d{1,2})(?:\:?(\d+))?(?:\:?(\d+))?\s*([AP]\.?M\.?)?', re.I)
 
 # Some date examples:
 # 5/27, 6.01.2004, 6.1.2004, 1-2-1981, 1-2-03
@@ -186,6 +186,9 @@ def is_time(text):
             second = 0
         else:
             second = int(second)
+
+        if ampm:
+            ampm = is_ampm(ampm)
 
         hour = int(hour)
 
