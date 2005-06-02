@@ -332,6 +332,20 @@ def pretty_time_range(diff, show_seconds=True):
         else: str = '0m'
     return str
 
+class Symbol:
+    """Lisp symbols for Python (sort of).  These are like strings but
+    used differently (think exception classes vs. string exceptions).
+    Two symbols of the same name are equal but not equal to the string
+    of their name."""
+    def __init__(self, name):
+        self.name = name
+    def __str__(self):
+        return self.name
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__, self.name)
+    def __eq__(self, other):
+        return self.name == other.name
+
 ################
 # testing code #
 ################
