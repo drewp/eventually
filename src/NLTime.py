@@ -498,15 +498,6 @@ class SegmentInterpretation(tuple):
         """In this method, we attempt to convert this SegmentInterpretation
         into a PartialTime.  We use context to try to fill in missing
         information.  Relative markers are expanded here."""
-        # fill in the current year if we don't have it but have part of a date
-        if 'month' in self.parsedict:
-            if not 'year' in self.parsedict:
-                self.parsedict['year'] = context.year
-        # fill in 0 for the minute if we have part of a time
-        if 'hour' in self.parsedict:
-            if not 'minute' in self.parsedict:
-                self.parsedict['minute'] = 0
-
         # expand 'time' and 'date'
         if 'time' in self.parsedict:
             t = self.parsedict['time']
@@ -527,6 +518,15 @@ class SegmentInterpretation(tuple):
                 del self.parsedict['date']
             except AttributeError:
                 pass
+
+        # fill in the current year if we don't have it but have part of a date
+        if self.parsedict.get('month') is not None:
+            if self.parsedict.get('year') is None:
+                self.parsedict['year'] = context.year
+        # fill in 0 for the minute if we have part of a time
+        if 'hour' in self.parsedict:
+            if not 'minute' in self.parsedict:
+                self.parsedict['minute'] = 0
 
         for expfunc in (self.expand_day_relatives, 
                           self.expand_dayofweek_with_relatives):

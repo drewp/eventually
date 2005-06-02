@@ -153,6 +153,8 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     'tomorrow at 3pm' : datetime.datetime.combine(now.as_date() + datetime.timedelta(days=1), datetime.time(15, 0)),
 
     '11/2000' : PartialTime(year=2000, month=11),
+    
+    'Wed 06/01' : datetime.date(2005, 6, 1),
 }
 # so the test cases have a consistent ordering
 test_cases = test_cases.items()
