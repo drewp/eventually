@@ -94,7 +94,7 @@ def is_date(text):
         results = []
         a, b, c = match.groups()
         # month-day-year and year-month-day
-        for month, day, year in ((a, b, c), (b, c, a)):
+        for month, day, year in ((a, b, c), (b, c, a), (a, c, b)):
             if month:
                 m = is_month(month)
             else:
@@ -111,12 +111,17 @@ def is_date(text):
             if m and d:
                 if year and y: # valid year portion
                     if type(y) is not list:
-                        y = (y,)
+                        y = [y]
                     results.extend([datetime.date(year, m, d) for year in y])
                 elif year: # invalid year portion
                     pass # the date is no good
                 else: # missing year portion
                     results.append(PartialTime(month=m, day=d))
+
+            if m and year:
+                if type(y) is not list:
+                    y = [y]
+                results.extend([PartialTime(year=year, month=m) for year in y])
 
         return results or None
 
@@ -248,7 +253,7 @@ def is_timehint(text):
 def is_rangehint(text):
     text = text.lower()
     text = punc_re.sub('', text)
-    if text in ['-', 'to', 'until']:
+    if text in ['-', 'to', 'until', 'through']:
         return text
 
 def is_locpiece(text):
