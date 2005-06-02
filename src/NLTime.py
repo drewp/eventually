@@ -422,14 +422,14 @@ class Segment(list):
                 scores[interp] = score
 
         # sort by scores then by distance to the context
-        # XXX for some reason, this doesn't sort properly
         def sortkey((parse, score)):
             try:
                 delta = parse - context
-                diff = -abs(delta.seconds)
+                days, secs = -abs(delta.days), -abs(delta.seconds)
             except TypeError:
-                diff = -1e10
-            return (score, diff)
+                days, secs = None, None # None is less than all integers
+            return (score, days, secs)
+        
         parses = sorted(scores.items(), key=sortkey, reverse=True)
         return parses
 
