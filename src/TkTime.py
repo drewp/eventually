@@ -43,7 +43,8 @@ class TkTime(AutoscrollbarText):
             self.text.tag_remove(tag, '0.0', 'end')
 
         self.tags = []
-        segments = NLTime.parse(text)
+        parse = NLTime.Parse(text)
+        segments = parse.segments
         for segmentnum, segment in enumerate(segments):
             valid_parses = segment.valid_parses(context=self.time_context)
             start, end = segment.extent()

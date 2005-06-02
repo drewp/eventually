@@ -36,13 +36,52 @@ And should add:
                  and context)
 """
 
+# some scoring information
+piecetype_scores = {
+    'dayofweek' : 5, 
+    'date' : 5,
+    'time' : 5, 
+    'month' : 4, 
+    'day' : 3, 
+    'year' : 2,
+    'ampm' : 5, 
+
+    # we'd like to have these rather than not, but they're generally less
+    # informative
+    'relative' : 2, 
+    'int' : 0, 
+    'locpiece' : 1, 
+    'lochint' : 1, 
+    'timehint' : 1, 
+    'rangehint' : 1
+}
+common_orders = [
+    "dayofweek month day year",
+    "dayofweek month day",
+    "dayofweek day",
+    "month year time",
+    "month year hour",
+    "month year hour minute",
+    "month year hour minute ampm",
+    "month day",
+    "month year",
+    "month",
+    "year",
+    "time",
+    'hour minute ampm',
+    'hour minute second ampm',
+    'hour minute',
+    'hour minute second',
+]
+common_orders = [tuple(order.split()) for order in common_orders]
+
 days_of_week = [day.lower() for day in calendar.day_name]
 month_names = [month.lower() for month in calendar.month_name]
 
 nonint_start = re.compile(r'^[^\d]+')
 nonint_end = re.compile(r'[^\d]+$')
 
-punc = r'[\.\,;:\'"\(\)\*]'
+punc = r'[\.\,;:\'"\(\)\*\+]'
 punc_re = re.compile(r'%s+' % punc)
 punc_start_re = re.compile(r'^%s+' % punc)
 punc_end_re = re.compile(r'%s+$' % punc)
@@ -290,44 +329,6 @@ all_parsers = [is_dayofweek, is_date, is_time, is_month, is_day, is_year,
                is_hour, is_int, is_timehint, is_ampm,
                is_relative, is_lochint, is_locpiece, is_rangehint]
 
-piecetype_scores = {
-    'dayofweek' : 5, 
-    'date' : 5,
-    'time' : 5, 
-    'month' : 4, 
-    'day' : 3, 
-    'year' : 2,
-    'ampm' : 5, 
-
-    # we'd like to have these rather than not, but they're generally less
-    # informative
-    'relative' : 1, 
-    'int' : 0, 
-    'locpiece' : 1, 
-    'lochint' : 1, 
-    'timehint' : 1, 
-    'rangehint' : 1
-}
-common_orders = [
-    "dayofweek month day year",
-    "dayofweek month day",
-    "dayofweek day",
-    "month year time",
-    "month year hour",
-    "month year hour minute",
-    "month year hour minute ampm",
-    "month day",
-    "month year",
-    "month",
-    "year",
-    "time",
-    'hour minute ampm',
-    'hour minute second ampm',
-    'hour minute',
-    'hour minute second',
-]
-common_orders = [tuple(order.split()) for order in common_orders]
-
 class ParsedWord:
     def __init__(self, word, linenum=None, colnum=None, wordnum=None, 
         parsers=None):
@@ -432,7 +433,7 @@ class Segment(list):
                 delta = parse - context
                 days, secs = -abs(delta.days), -abs(delta.seconds)
             except TypeError:
-                days, secs = None, None # None is less than all integers
+                days, secs = None, None # None is less than all numbers
             return (score, days, secs)
         
         parses = sorted(scores.items(), key=sortkey, reverse=True)
@@ -619,33 +620,36 @@ def cartesianproduct(lists, keep_func=None):
 
         return all
 
-def parse(text):
-    segments = []
-    cur_segment = Segment()
-    for linenum, line in enumerate(text.splitlines()):
-        if cur_segment:
-            # new segment per line
-            segments.append(cur_segment)
-            cur_segment = Segment()
-        colnum = 0
-        wordnum = 0
-        for word in ws_split.split(line):
-            if not word:
-                colnum += 1
-                continue
-
-            p = ParsedWord(word, linenum, colnum, wordnum)
-            if p.parses:
-                cur_segment.append(p)
-            elif cur_segment:
-                segments.append(cur_segment)
+class Parse:
+    def __init__(self, text, context=None):
+        self.context = context
+        self.parse(text)
+    def parse(self, text):
+        self.segments = []
+        cur_segment = Segment()
+        for linenum, line in enumerate(text.splitlines()):
+            if cur_segment:
+                # new segment per line
+                self.segments.append(cur_segment)
                 cur_segment = Segment()
-            colnum += len(word) + 1
-            wordnum += 1
+            colnum = 0
+            wordnum = 0
+            for word in ws_split.split(line):
+                if not word:
+                    colnum += 1
+                    continue
 
-    if cur_segment:
-        segments.append(cur_segment)
-    return segments
+                p = ParsedWord(word, linenum, colnum, wordnum)
+                if p.parses:
+                    cur_segment.append(p)
+                elif cur_segment:
+                    self.segments.append(cur_segment)
+                    cur_segment = Segment()
+                colnum += len(word) + 1
+                wordnum += 1
+
+        if cur_segment:
+            self.segments.append(cur_segment)
 
 if __name__ == "__main__":
     import fileinput

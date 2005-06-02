@@ -2,7 +2,7 @@
 import sys
 sys.path.append('../src')
 
-from NLTime import parse
+from NLTime import Parse
 from PartialTime import PartialTime
 from sets import Set
 import datetime
@@ -183,7 +183,8 @@ for test_case, expected_results in test_cases:
     num_tests_run += 1
     num_segments_run += len(expected_results)
 
-    segments = parse(test_case)
+    parse = Parse(test_case)
+    segments = parse.segments
     for segment in segments:
         seg_results = segment.valid_parses(context=now)
         if seg_results:
