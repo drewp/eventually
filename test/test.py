@@ -5,7 +5,7 @@ sys.path.append('../src')
 from NLTime import Parse
 from PartialTime import PartialTime
 from sets import Set
-import datetime
+import datetime, calendar
 
 # we try to use the AIMA library, which provides some py2.4 support for
 # earlier Pythons
@@ -14,7 +14,13 @@ try:
 except ImportError:
     pass
 
+def find_next_day_of_week(dayofweek, start):
+    while start.weekday() != dayofweek:
+        start += datetime.timedelta(days=1)
+    return start
+
 now = PartialTime.now()
+
 # string : list of required results or None
 test_cases = {
     "Jan 3rd" : datetime.date(2005, 1, 3),

@@ -67,20 +67,39 @@ class PartialTime:
             return True
 
     def __getattr__(self, attr):
-        if attr in ('__add__', '__sub__', '__le__', '__lt__', '__eq__', 
-                    '__ge__', '__gt__'):
+        # operations on two datetime objects or a datetime and timedelta
+        if attr in ('__add__', '__radd__', '__sub__', '__rsub__', '__le__', 
+                    '__lt__', '__eq__', '__ne__', '__ge__', '__gt__'):
             def func(other, self=self, op=attr):
                 self_dt = self.as_datetime()
-                other_dt = other.as_datetime()
+                try:
+                    other = other.as_datetime()
+                except:
+                    pass
 
-                if self_dt and other_dt:
+                if self_dt and other:
                     opfunc = getattr(self_dt, attr)
-                    return opfunc(other_dt)
+                    result = opfunc(other)
+                    if not isinstance(result, datetime.timedelta):
+                        try:
+                            result = PartialTime.from_object(result)
+                        except:
+                            pass
+                    return result
                 else:
                     raise TypeError("Insufficient information in the PartialTimes for '-' operation.")
             return func
-        else:
-            raise AttributeError("No such attribute: %r" % attr)
+        # simple operations on datetime objects
+        elif attr in ('ctime', 'isocalendar', 'isoformat', 'isoweekday',
+                      'replace', 'timetuple', 'toordinal', 'weekday'):
+            try:
+                self_dt = self.as_datetime()
+                if self_dt:
+                    return getattr(self_dt, attr)
+            except AttributeError:
+                pass # this will get raised anyway at the end of the function
+
+        raise AttributeError("No such attribute: %r" % attr)
 
     def copy(self):
         return PartialTime.from_object(self.__dict__)
@@ -139,6 +158,9 @@ class PartialTime:
     def now(cls):
         return cls.from_object(datetime.datetime.now())
     now = classmethod(now)
+    def today(cls):
+        return cls.from_object(datetime.datetime.today())
+    today = classmethod(today)
 
     def as_dict(self):
         return self.__dict__.copy()
