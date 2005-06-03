@@ -167,20 +167,24 @@ class PartialTime:
         return dt
 
     def is_valid(self):
-        """Whether this PartialTime makes sense.  Currently, we validate
-        (1) whether our dayofweek makes sense given a date
-        (2) whether our AM/PM makes sense given a time"""
-        if self.dayofweek:
-            try:
-                year, month, day = self.year, self.month, self.day
-                dayofweek = self.dayofweek
-                # they're 0-based, we're 1-based
-                realdayofweek = self.as_date().weekday() + 1
-                if realdayofweek != dayofweek:
-                    return False
-            except AttributeError:
-                pass
+        "Returns whether this PartialTime makes sense."
+        return self.is_valid_dayofweek() and self.is_valid_ampm()
 
+    def is_valid_dayofweek(self):
+        "Returns whether our dayofweek makes sense given a date"
+        try:
+            dayofweek = self.dayofweek
+            year, month, day = self.year, self.month, self.day
+            # they're 0-based, we're 1-based
+            realdayofweek = self.as_date().weekday() + 1
+            if realdayofweek != dayofweek:
+                return False
+        except AttributeError:
+            pass
+        return True
+
+    def is_valid_ampm(self):
+        "Returns whether our AM/PM makes sense given a time"
         ampm = self.ampm.upper()
         if (ampm and (self.hour < 1 or self.hour > 12)) or \
            (self.hour < 0 or self.hour > 23):
