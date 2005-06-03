@@ -35,9 +35,16 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     # XXX we don't do ranges yet
     "Monday to thursday at 3pm" : None,
 
-    "monday at 3pm" : 1,
-    "monday at 3:00pm" : 1,
-    "monday at 3:00" : 1,
+    "monday at 3pm" : datetime.datetime.combine(
+                        find_next_day_of_week(calendar.MONDAY, now).as_date(),
+                        datetime.time(15, 0)),
+    "monday at 3:00pm" : datetime.datetime.combine(
+                        find_next_day_of_week(calendar.MONDAY, now).as_date(),
+                        datetime.time(15, 0)),
+    "monday at 3:00" : datetime.datetime.combine(
+                        find_next_day_of_week(calendar.MONDAY, now).as_date(),
+                        datetime.time(15, 0)),
+
 
     """When: friday, may 27, early morning (11am
     where: 252 Ives st""" : (datetime.time(11, 0), datetime.date(2005, 5, 27)),
@@ -157,10 +164,17 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     'today' : now.as_date(),
     'now' : now,
     'tomorrow at 3pm' : datetime.datetime.combine(now.as_date() + datetime.timedelta(days=1), datetime.time(15, 0)),
+    '3pm tomorrow' : datetime.datetime.combine(now.as_date() + datetime.timedelta(days=1), datetime.time(15, 0)),
+    '3pm today' : datetime.datetime.combine(now.as_date(), 
+                                            datetime.time(15, 0)),
 
     '11/2000' : PartialTime(year=2000, month=11),
     
     'Wed 06/01' : datetime.date(2005, 6, 1),
+
+    "sunday june 5th" : datetime.date(2005, 6, 5),
+
+    "Friday september 30th" : datetime.date(2005, 9, 30),
 }
 # so the test cases have a consistent ordering
 test_cases = test_cases.items()
