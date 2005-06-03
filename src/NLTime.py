@@ -605,14 +605,28 @@ def pieces_compatible(piece1, piece2):
         else:
             return True
 
-def cartesianproduct(lists, keep_func=None):
+def cartesianproduct(lists, keep_func=None, allow_empty_column=True):
+    """Given a list of lists, computes the cartesian products.  In other
+    words, if our lists are (A, B, C), A=1,2,3, B=4,5,6, C=7,8,9, we will
+    compute all products of the list: (1, 4, 7), (1, 4, 8), ... (3, 6, 9)
+
+    keep_func is a function that tells use if we want to keep a
+    product.
+    
+    allow_empty_column means that we can optionally omit a list, making
+    this function more like an ordered power set."""
     if len(lists) == 0:
         return []
     elif len(lists) == 1:
-        return [(piece,) for piece in lists[0]]
+        singletons = [(piece,) for piece in lists[0]]
+        if keep_func and singletons:
+            singletons = [singleton for singleton in singletons if
+                keep_func(singleton)]
+        return singletons
     else: # 2+ items
         tail_product = cartesianproduct(lists[1:], keep_func)
-        tail_product.append(()) # optionally, don't use any tails
+        if allow_empty_column:
+            tail_product.append(()) # optionally, don't use any tails
         heads = lists[0]
         all = tail_product[:]
         for tail in tail_product:
