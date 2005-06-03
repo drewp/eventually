@@ -536,6 +536,7 @@ class SegmentInterpretation(tuple):
         else:
             pt = PartialTime.from_object(self.parsedict)
             return pt
+
     def expand_day_relatives(self, context):
         """Expands 'yesterday', 'today', 'tomorrow', and 'now'."""
         if 'relative' in self.parsedict:
@@ -546,7 +547,9 @@ class SegmentInterpretation(tuple):
 
                 day_offset = ['yesterday', 'today', 'tomorrow'].index(rel) - 1
                 day_delta = datetime.timedelta(days=day_offset)
-                return PartialTime.from_object(context.as_date() + day_delta)
+                original = PartialTime.from_object(self.parsedict)
+                newdate = PartialTime.from_object(context.as_date() + day_delta)
+                return original.combine(newdate)
             except ValueError:
                 pass
 
