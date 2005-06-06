@@ -146,7 +146,7 @@ class TkTimeWithContext(Tk.Frame):
         if context is None or (context.as_date() or context.as_time()):
             self.tktime.time_context = context
             self.tktime.sched_update(force_update=True)
-        if context and context != NotPresent:
+        if context and context is not NotPresent:
             self.contextlabel['text'] = str(context)
         else:
             self.contextlabel['text'] = ""
@@ -155,8 +155,11 @@ class TkTimeWithContext(Tk.Frame):
         We set the context to be the first parse from the first segment
         (this, of course, can be manually overridden)."""
         if segmentnum == 0:
-            parse, score = parses[0]
-            self.set_context(parse)
+            if parses:
+                parse, score = parses[0]
+                self.set_context(parse)
+            else:
+                self.set_context(None)
     def typed_in_context(self, *args):
         # if there's no text in the context, set the context to None
         if not self.context.has_text():
