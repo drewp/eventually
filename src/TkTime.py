@@ -29,9 +29,11 @@ class TkTime(AutoscrollbarText):
             lambda evt: self.after(50, self.update_display), '+')
         self.text.bind('<<PasteSelection>>', 
             lambda evt: self.after(50, self.update_display), '+')
+        self.text.bind('<ButtonRelease-3>', self.remove_popups)
 
         self.tags = []
         self.selections = {}
+        self.popups = []
     def display_parses(self, text, force_update=False):
         sig = getsignature(text)
         if sig == self.last_sig and not force_update:
@@ -39,8 +41,10 @@ class TkTime(AutoscrollbarText):
         else:
             self.last_sig = sig
 
+        # reset our tags and popup menus
         for tag in self.tags:
-            self.text.tag_remove(tag, '0.0', 'end')
+            self.text.tag_delete(tag)
+        self.popups = []
 
         self.tags = []
         parse = NLTime.Parse(text)
@@ -58,7 +62,7 @@ class TkTime(AutoscrollbarText):
                     color = self.parsed_color
                 self.text.tag_config(tag, background=color, borderwidth=1, 
                     relief='raised')
-                self.make_menu(tag, segment, valid_parses)
+                self.popups.append(self.make_menu(tag, segment, valid_parses))
             else:
                 self.text.tag_config(tag, background=self.unparsed_color)
             self.add_tag(tag, start, end)
@@ -67,7 +71,7 @@ class TkTime(AutoscrollbarText):
     def add_tag(self, tag, start, end):
         self.text.tag_add(tag, start, end)
         self.tags.append(tag)
-    def make_menu(self, tag, segment, valid_parses):
+    def make_menu(self, tag, segment, valid_parses, limit=20):
         popup = Tk.Menu(self, tearoff=0)
         tagnum = int(tag[3:])
 
@@ -89,7 +93,7 @@ class TkTime(AutoscrollbarText):
             else:
                 self.text.tag_config(tag, relief='raised')
 
-        for parse, score in valid_parses[:20]:
+        for parse, score in valid_parses[:limit]:
             popup.add_command(label="%s (%s)" % (parse, score), 
                 command=lambda parse=parse: select(parse))
 
@@ -105,10 +109,14 @@ class TkTime(AutoscrollbarText):
                 # make sure to release the grab (Tk 8.0a1 only)
                 popup.grab_release()
 
-        self.text.tag_bind(tag, "<Button-3>", do_popup)
+        self.text.tag_bind(tag, "<ButtonPress-3>", do_popup)
         self.text.tag_bind(tag, "<Enter>", lambda evt: hover(True))
         self.text.tag_bind(tag, "<Leave>", lambda evt: hover(False))
 
+        return popup
+    def remove_popups(self, event):
+        for popup in self.popups:
+            popup.unpost()
     def sched_update(self, *args, **kw):
         force_update = kw.pop('force_update', False)
         if self.scheduled_update:
