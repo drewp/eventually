@@ -208,6 +208,9 @@ def is_time(text):
     text = punc_start_re.sub('', text)
     text = punc_end_re.sub('', text)
 
+    if ordinals_re.search(text):
+        return None
+
     match = time_re.search(text)
     # 3pm (len 3) to 12:45:78pm (len 10)
     if 2 < len(text) < 11 and match and '/' not in text and '-' not in text:
