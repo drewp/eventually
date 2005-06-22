@@ -165,9 +165,10 @@ def is_date(text):
         return results or None
 
 def is_int(text):
-    # remove trailing non-numbers
-    text = nonint_end.sub('', text)
-    text = nonint_start.sub('', text)
+    # remove some (but not all) non-numbers
+    text = punc_start_re.sub('', text)
+    text = punc_end_re.sub('', text)
+    text = ordinals_re.sub('', text)
     try:
         return int(text)
     except ValueError:
