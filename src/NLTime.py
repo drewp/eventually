@@ -333,12 +333,12 @@ all_parsers = [is_dayofweek, is_date, is_time, is_month, is_day, is_year,
                is_relative, is_lochint, is_locpiece, is_rangehint]
 
 class ParsedWord:
-    def __init__(self, word, linenum=None, colnum=None, wordnum=None, 
-        parsers=None):
+    def __init__(self, word, linenum, colnum, wordnum, charnum, parsers=None):
         self.originalword = word
         self.linenum = linenum
         self.colnum = colnum
         self.wordnum = wordnum
+        self.charnum = charnum
         self.parsers = parsers or all_parsers
 
         self.parses = []
@@ -380,11 +380,14 @@ class Segment(list):
     def __str__(self):
         """Returns a string of all words in this Segment."""
         return ' '.join([parsedword.originalword for parsedword in self])
-    def extent(self):
+    def extent(self, charindices=False):
         """Returns the start and end line:column for this segment."""
         first, last = self[0], self[-1]
-        return ((first.linenum + 1, first.colnum), 
-                (last.linenum + 1, last.colnum + len(str(last))))
+        if charindices:
+            return (first.charnum, last.charnum + len(str(last)))
+        else:
+            return ((first.linenum + 1, first.colnum), 
+                    (last.linenum + 1, last.colnum + len(str(last))))
     def just_hints(self):
         for word in self:
             if not (word.is_only_relative() or word.is_only_hint()):
@@ -647,6 +650,7 @@ class Parse:
     def parse(self, text):
         self.segments = []
         cur_segment = Segment()
+        charnum = 0
         for linenum, line in enumerate(text.splitlines()):
             if cur_segment:
                 # new segment per line
@@ -657,15 +661,17 @@ class Parse:
             for word in ws_split.split(line):
                 if not word:
                     colnum += 1
+                    charnum += 1
                     continue
 
-                p = ParsedWord(word, linenum, colnum, wordnum)
+                p = ParsedWord(word, linenum, colnum, wordnum, charnum)
                 if p.parses:
                     cur_segment.append(p)
                 elif cur_segment:
                     self.segments.append(cur_segment)
                     cur_segment = Segment()
                 colnum += len(word) + 1
+                charnum += len(word) + 1
                 wordnum += 1
 
         if cur_segment:
