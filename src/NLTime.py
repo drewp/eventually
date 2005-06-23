@@ -177,7 +177,7 @@ def is_int(text):
 def is_hour(text):
     i = is_int(text)
     if i is not None and not ordinals_re.search(text):
-        if 0 <= i <= 11:
+        if 1 <= i <= 11:
             return closest(12, (i, i + 12))
         elif 0 <= i <= 23:
             return i
