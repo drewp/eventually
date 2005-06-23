@@ -179,6 +179,14 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     "Friday september 30th" : datetime.date(2005, 9, 30),
 
     "0;" : None,
+    "1px" : None,
+    "9=20" : None,
+    "5.0" : None,
+    "+1 (650)" : None,
+    "v1.3.90-cvs" : None,
+    "$5.95<br>" : None,
+    "$5.95" : None,
+    "10pt;=20" : None,
 }
 
 def report_test(test_case, segments, expected_results, unmatched_results,
