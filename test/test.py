@@ -21,7 +21,9 @@ def find_next_day_of_week(dayofweek, start):
 
 now = PartialTime.now()
 
-# string : list of required results or None
+# string : list of required results
+#          or None (no matches expected)
+#          or NotImplementedError (skip this test)
 test_cases = {
     "Jan 3rd" : datetime.date(2005, 1, 3),
 
@@ -33,7 +35,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     "FRI JUL 19 2002" : datetime.date(2002, 7, 19),
 
     # XXX we don't do ranges yet
-    "Monday to thursday at 3pm" : None,
+    "Monday to thursday at 3pm" : NotImplementedError,
 
     "monday at 3pm" : datetime.datetime.combine(
                         find_next_day_of_week(calendar.MONDAY, now).as_date(),
@@ -99,7 +101,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     Champagne Toast.  We will be wishing all of our graduating students
     farewell and good luck on the next phase of their lives!  ALL graduate
     students are invited as well as family and friends.  (Please bring ID
-    for age verification!)""" : None,
+    for age verification!)""" : NotImplementedError,
 
     # XXX this is really a range
     """We'll be having a special meeting of BLLIP Fri 5/27 11-1 in CIT345.
@@ -128,7 +130,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     """ACM SIGGRAPH, SIGCHI and AIGA have announced the 2nd international DUX
     conference, "Designing for User Experiences", will take place 3-5
     November, in San Francisco, CA at the beautiful Fort Mason Center. The San
-    """ : None,
+    """ : NotImplementedError,
 
     "On May 27, 2005, at 11:08 AM," : datetime.datetime(2005, 5, 27, 11, 8),
 
@@ -175,7 +177,34 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     "sunday june 5th" : datetime.date(2005, 6, 5),
 
     "Friday september 30th" : datetime.date(2005, 9, 30),
+
+    "0;" : None,
 }
+
+def report_test(test_case, segments, expected_results, unmatched_results,
+                msg=""):
+    print "Test case:"
+    print "    "+repr(test_case)
+    for num, segment in enumerate(segments):
+        print "    Segment %d: %r" % (num, str(segment))
+        for parsedword in segment:
+            print "        "+repr(parsedword)
+
+        seg_results = segment.valid_parses()
+        if seg_results:
+            print "        scr\tresult"
+            for result, score in seg_results[:20]:
+                print "        %s\t%s" % (score, result),
+                if result in expected_results:
+                    print "<=="
+                else:
+                    print
+
+    print "    Unmatched results:", unmatched_results
+    if msg:
+        print "    "+msg
+    print
+    
 
 def run_tests(opts, test_cases):
     # so the test cases have a consistent ordering
@@ -190,8 +219,21 @@ def run_tests(opts, test_cases):
     for test_case, expected_results in test_cases:
         # we don't have a result for this yet (maybe because the type of the
         # result object hasn't been built yet, e.g. ranges)
-        if not expected_results:
+        if expected_results is NotImplementedError:
             continue
+
+        parse = Parse(test_case)
+        segments = parse.segments
+        num_tests_run += 1
+
+        if expected_results is None:
+            if len(segments) > 0:
+                num_tests_failed += 1
+                if not opts.summary_only:
+                    report_test(test_case, segments, [], [],
+                                msg="Parse found %s segments but there should "
+                                "have been none" % len(segments))
+                continue
 
         # listify the test case if we haven't already
         if not isinstance(expected_results, (list, tuple)):
@@ -201,11 +243,9 @@ def run_tests(opts, test_cases):
             for res in expected_results]
         unmatched_results = list(expected_results) # a copy that we'll modify
 
-        num_tests_run += 1
         num_segments_run += len(expected_results)
 
-        parse = Parse(test_case)
-        segments = parse.segments
+            
         for segment in segments:
             seg_results = segment.valid_parses(context=now)
             if seg_results:
@@ -219,29 +259,9 @@ def run_tests(opts, test_cases):
         if unmatched_results or opts.verbose:
             if unmatched_results:
                 num_tests_failed += 1
-            if opts.summary_only:
-                continue
-            print "Test case:"
-            print repr(test_case)
-            print
-            for num, segment in enumerate(segments):
-                print "Segment %d:" % num
-                print str(segment)
-                for parsedword in segment:
-                    print repr(parsedword)
-
-                seg_results = segment.valid_parses()
-                if seg_results:
-                    for result, score in seg_results[:20]:
-                        print "%s\t%s" % (score, result),
-                        if result in expected_results:
-                            print "<=="
-                        else:
-                            print
-                    print
-
-            print "Unmatched results:", unmatched_results
-            print "========================="
+            if not opts.summary_only:
+                report_test(test_case, segments,
+                            expected_results, unmatched_results)
 
     print "Summary:"
     print "Ran %d tests, %d failed." % (num_tests_run, num_tests_failed)
