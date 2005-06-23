@@ -1,11 +1,11 @@
 # so it can be run in the repo
-import sys
-sys.path.append('../src')
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__),"..","src"))
 
 from NLTime import Parse
 from PartialTime import PartialTime
 from sets import Set
-import datetime, calendar
+import datetime, calendar, optparse
 
 # we try to use the AIMA library, which provides some py2.4 support for
 # earlier Pythons
@@ -57,13 +57,13 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     don't need to be all secretive about it...""" : 
         datetime.datetime(2005, 5, 23, 20, 0),
 
-    """Friday, 03 Jun 05 	Flight DH 1640 	
-    Depart: 	Providence, RI (PVD) 	5:04 pm 	
-    Arrive: 	Washington-Dulles, VA (IAD) 	6:40 pm
+    """Friday, 03 Jun 05        Flight DH 1640  
+    Depart:     Providence, RI (PVD)    5:04 pm         
+    Arrive:     Washington-Dulles, VA (IAD)     6:40 pm
 
-    Sunday, 05 Jun 05 	Flight DH 1633 	
-    Depart: 	Washington-Dulles, VA (IAD) 	9:10 pm 	
-    Arrive: 	Providence, RI (PVD) 	10:28 pm""" :
+    Sunday, 05 Jun 05   Flight DH 1633  
+    Depart:     Washington-Dulles, VA (IAD)     9:10 pm         
+    Arrive:     Providence, RI (PVD)    10:28 pm""" :
         (datetime.date(2005, 6, 3), datetime.time(17, 4), 
          datetime.time(18, 40),
          datetime.date(2005, 6, 5), datetime.time(21, 10), 
@@ -176,80 +176,87 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
 
     "Friday september 30th" : datetime.date(2005, 9, 30),
 }
-# so the test cases have a consistent ordering
-test_cases = test_cases.items()
-test_cases.sort()
 
-verbose = False
-summary_only = False
+def run_tests(opts, test_cases):
+    # so the test cases have a consistent ordering
+    test_cases = test_cases.items()
+    test_cases.sort()
 
-ranks = []
-num_tests_failed = 0
-num_tests_run = 0
-num_segments_failed = 0
-num_segments_run = 0
-for test_case, expected_results in test_cases:
-    # we don't have a result for this yet (maybe because the type of the
-    # result object hasn't been built yet, e.g. ranges)
-    if not expected_results:
-        continue
-
-    # listify the test case if we haven't already
-    if not isinstance(expected_results, (list, tuple)):
-        expected_results = [expected_results,]
-
-    expected_results = [PartialTime.from_object(res) 
-        for res in expected_results]
-    unmatched_results = list(expected_results) # a copy that we'll modify
-
-    num_tests_run += 1
-    num_segments_run += len(expected_results)
-
-    parse = Parse(test_case)
-    segments = parse.segments
-    for segment in segments:
-        seg_results = segment.valid_parses(context=now)
-        if seg_results:
-            for rank, (result, score) in enumerate(seg_results[:20]):
-                if result in unmatched_results:
-                    unmatched_results.remove(result)
-                    ranks.append(rank)
-
-    num_segments_failed += len(unmatched_results)
-
-    if unmatched_results or verbose:
-        if unmatched_results:
-            num_tests_failed += 1
-        if summary_only:
+    ranks = []
+    num_tests_failed = 0
+    num_tests_run = 0
+    num_segments_failed = 0
+    num_segments_run = 0
+    for test_case, expected_results in test_cases:
+        # we don't have a result for this yet (maybe because the type of the
+        # result object hasn't been built yet, e.g. ranges)
+        if not expected_results:
             continue
-        print "Test case:"
-        print repr(test_case)
-        print
-        for num, segment in enumerate(segments):
-            print "Segment %d:" % num
-            print str(segment)
-            for parsedword in segment:
-                print repr(parsedword)
 
-            seg_results = segment.valid_parses()
+        # listify the test case if we haven't already
+        if not isinstance(expected_results, (list, tuple)):
+            expected_results = [expected_results,]
+
+        expected_results = [PartialTime.from_object(res) 
+            for res in expected_results]
+        unmatched_results = list(expected_results) # a copy that we'll modify
+
+        num_tests_run += 1
+        num_segments_run += len(expected_results)
+
+        parse = Parse(test_case)
+        segments = parse.segments
+        for segment in segments:
+            seg_results = segment.valid_parses(context=now)
             if seg_results:
-                for result, score in seg_results[:20]:
-                    print "%s\t%s" % (score, result),
-                    if result in expected_results:
-                        print "<=="
-                    else:
-                        print
-                print
+                for rank, (result, score) in enumerate(seg_results[:20]):
+                    if result in unmatched_results:
+                        unmatched_results.remove(result)
+                        ranks.append(rank)
 
-        print "Unmatched results:", unmatched_results
-        print "========================="
+        num_segments_failed += len(unmatched_results)
 
-print "Summary:"
-print "Ran %d tests, %d failed." % (num_tests_run, num_tests_failed)
-print "Ran %d segment tests, %d failed." % (num_segments_run, 
-                                            num_segments_failed)
-# this tells us how well it is doing for the answers that it did find
-average = sum(ranks) / float(len(ranks))
-print 'Distribution:', ', '.join([str(pair) for pair in histogram(ranks)])
-print "Average rank: %.5f, stddev %.5f" % (average,
-                                           stddev(ranks, meanval=average))
+        if unmatched_results or opts.verbose:
+            if unmatched_results:
+                num_tests_failed += 1
+            if opts.summary_only:
+                continue
+            print "Test case:"
+            print repr(test_case)
+            print
+            for num, segment in enumerate(segments):
+                print "Segment %d:" % num
+                print str(segment)
+                for parsedword in segment:
+                    print repr(parsedword)
+
+                seg_results = segment.valid_parses()
+                if seg_results:
+                    for result, score in seg_results[:20]:
+                        print "%s\t%s" % (score, result),
+                        if result in expected_results:
+                            print "<=="
+                        else:
+                            print
+                    print
+
+            print "Unmatched results:", unmatched_results
+            print "========================="
+
+    print "Summary:"
+    print "Ran %d tests, %d failed." % (num_tests_run, num_tests_failed)
+    print "Ran %d segment tests, %d failed." % (num_segments_run, 
+                                                num_segments_failed)
+    # this tells us how well it is doing for the answers that it did find
+    average = sum(ranks) / float(len(ranks))
+    print 'Distribution:', ', '.join([str(pair) for pair in histogram(ranks)])
+    print "Average rank: %.5f, stddev %.5f" % (average,
+                                               stddev(ranks, meanval=average))
+
+
+parser = optparse.OptionParser()
+parser.add_option("-v", "--verbose", action="store_true")
+parser.add_option("-s", "--summary-only", action="store_true")
+opts,args = parser.parse_args()
+
+run_tests(opts, test_cases)
