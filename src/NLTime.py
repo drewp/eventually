@@ -212,7 +212,7 @@ def is_time(text):
     if ordinals_re.search(text):
         return None
 
-    match = time_re.search(text)
+    match = time_re.match(text)
     # 3pm (len 3) to 12:45:78pm (len 10)
     if 2 < len(text) < 11 and match and '/' not in text and '-' not in text:
         hour, minute, second, ampm = match.groups()
@@ -390,6 +390,8 @@ class Segment(list):
             return ((first.linenum + 1, first.colnum), 
                     (last.linenum + 1, last.colnum + len(str(last))))
     def just_hints(self):
+        """Returns whether this Segment is only hints and relative
+        markers."""
         for word in self:
             if not (word.is_only_relative() or word.is_only_hint()):
                 return False
