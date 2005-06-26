@@ -299,6 +299,37 @@ def is_rangehint(text):
     if text in ['-', 'to', 'until', 'through']:
         return text
 
+# Coming soon!
+def is_range(text):
+    text = text.strip()
+    if text.count('-') == 1:
+        left, right = text.split('-')
+        if not (left or right):
+            return None
+        # XXX we should be passing context
+        lparse = Parse(left)
+        rparse = Parse(right)
+
+        # since the string doesn't have any spaces, (that's what we split on
+        # to get the text variable here) lparse and rparse better have exactly
+        # one Segment
+        if (len(lparse.segments) != 1) or (len(rparse.segments) != 1):
+            return None
+        lnode = lparse.segments[0][0]
+        rnode = rparse.segments[0][0]
+        results = []
+        for ltype, lparse in lnode.parses:
+            for rtype, rparse in rnode.parses:
+                if ltype == rtype:
+                    # TODO date and time should be in this list when 
+                    # PartialTime is fixed
+                    if ltype in ('month', 'day', 'year'):
+                        if rparse <= lparse:
+                            continue
+                    results.append((ltype, lparse, rparse))
+        print 'results', results
+        return results # these will need to be in a different format
+
 def is_locpiece(text):
     text = text.lower()
     text = punc_re.sub('', text)
@@ -329,9 +360,7 @@ def is_relative(text):
 
         return text
 
-all_parsers = [is_dayofweek, is_date, is_time, is_month, is_day, is_year,
-               is_hour, is_int, is_timehint, is_ampm,
-               is_relative, is_lochint, is_locpiece, is_rangehint]
+all_parsers = [locals()[name] for name in dir() if name.startswith('is_')]
 
 class ParsedWord:
     def __init__(self, word, linenum, colnum, wordnum, charnum, parsers=None):
