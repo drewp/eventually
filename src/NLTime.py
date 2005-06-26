@@ -348,11 +348,9 @@ def is_relative(text):
     markers require a context (and possibly more information) to evaluate."""
     text = text.lower()
     text = punc_re.sub('', text)
-    # TODO list more ordinals?
     if text in ['next', 'last', 'this', 'upcoming', 'previous', 'following',
-                'first', 'second', 'third', 'fourth', 'fifth', "today", 
-                "tomorrow", "yesterday", "morning", "afternoon", "evening",
-                "now"]:
+                'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 
+                'evening', 'now']:
         # normalize some of these
         text = text.replace('following', 'next')
         text = text.replace('upcoming', 'this')
@@ -360,6 +358,22 @@ def is_relative(text):
 
         return text
 
+ordinals = ('first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',
+            'eigth', 'ninth', 'tenth')
+
+def is_ordinal(text):
+    """Attempts to return a normalized ordinal number or None if the
+    text is not an ordinal.
+    "first" -> 1, "second" -> 2, etc."""
+    # TODO list/compute more ordinals? ("twenty-third", etc.)
+    text = text.lower()
+    text = punc_re.sub('', text)
+    try:
+        return ordinals.index(text) + 1
+    except ValueError:
+        return None
+
+# a list of all token parsers
 all_parsers = [locals()[name] for name in dir() if name.startswith('is_')]
 
 class ParsedWord:
@@ -499,16 +513,11 @@ class SegmentInterpretation(tuple):
         # print "score", self.parsedict, repr(result)
         if 'dayofweek' in self.parsedict and 'month' in self.parsedict:
             if isinstance(result, (datetime.date, datetime.datetime)):
-                # print "checking dow"
                 try:
                     # they're 0-based, we're 1-based
                     year, month, day = result.year, result.month, result.day
-                    # print "ymd", year, month, day
                     dayofweek = self.parsedict['dayofweek']
-                    # print "dow", dayofweek
                     realdayofweek = result.weekday() + 1
-                    # realdayofweek = calendar.weekday(year, month, day) + 1
-                    # print "real", realdayofweek
                     if realdayofweek == dayofweek:
                         score += 40
                     else:
@@ -594,8 +603,8 @@ class SegmentInterpretation(tuple):
         return None
 
     def expand_dayofweek_with_relatives(self, context):
-        """Perform a day of week expansion given a relative ("this
-        monday", "next tuesday", etc.)"""
+        """Perform a day of week expansion given a relative ("this monday", 
+        "next tuesday", etc.)"""
         without_dow = self.parsedict.copy()
         dow = without_dow.pop('dayofweek', None)
         # if we have a dayofweek but no date elements
