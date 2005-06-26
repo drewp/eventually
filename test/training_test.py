@@ -1,7 +1,7 @@
 
 import sys, os, unittest, tempfile
 sys.path.append(os.path.join(os.path.dirname(__file__),"..","src"))
-from Training import TrainedParse, trainedParseFactory
+from Training import TrainingStore, TrainedParse, trainedParseFactory
 from PartialTime import PartialTime
 
 class PassThru(unittest.TestCase):
@@ -13,8 +13,15 @@ class PassThru(unittest.TestCase):
 
 class WithStore(unittest.TestCase):
     def setUp(self):
-        f = tempfile.NamedTemporaryFile()
-        self.tp = trainedParseFactory(f)
+        f = tempfile.NamedTemporaryFile(prefix='eventually_train')
+        self.filename = f.name
+        self.tp = trainedParseFactory(TrainingStore(f.name))
+
+    def tearDown(self):
+        try:
+            os.remove(self.filename)
+        except OSError:
+            pass
 
     def testNoCorrections(self):
         pr = self.tp("the time is 3pm").parsedRanges()
@@ -34,6 +41,24 @@ class WithStore(unittest.TestCase):
         self.assertEqual(pr[0][1], PartialTime(hour=12, minute=30))
         self.assertEqual(pr[1][1], PartialTime(hour=12, minute=45))
         self.assertEqual(pr[0][1], PartialTime(hour=12, minute=30))
+
+    def testRangeChange(self):
+        p = self.tp("the event runs from 1-2")
+        p.saveCorrection((20,21), "13:00", old_range=(15,23))
+        p.saveCorrection((22,23), "14:00", old_range=(15,23))
+        pr = p.parsedRanges()
+        self.assertEqual(pr,
+                         [((20, 21), PartialTime(hour=13)),
+                          ((22, 23), PartialTime(hour=14))])
+
+    def testSave(self):
+        p = self.tp("noonish")
+        p.saveCorrection((0,7), "noon")
+
+        p2 = self.tp("noonish")
+        pr = p2.parsedRanges()
+        self.assertEqual(pr[0], ((0,7), PartialTime(hour=12)))
+
 
 if __name__ == '__main__':
     import unittest
