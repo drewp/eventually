@@ -58,9 +58,10 @@ class PartialTime:
     
     def __eq__(self, other):
         other = PartialTime.from_object(other)
-        for attr in partialtime_attrs:
-            if attr == 'ampm':
-                continue
+        # we want to skip dayofweek and ampm for comparison since they're only
+        # hints
+        # TODO determine if we want to continue to skip timezone
+        for attr in partialtime_attrs[:-3]:
             if (getattr(self, attr) or 0) != (getattr(other, attr) or 0):
                 return False
         else:
