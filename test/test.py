@@ -190,15 +190,17 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
 }
 
 def report_test(test_case, segments, expected_results, unmatched_results,
-                msg=""):
+                msg="", context=now, filter_incomplete=False):
     print "Test case:"
     print "    "+repr(test_case)
     for num, segment in enumerate(segments):
         print "    Segment %d: %r" % (num, str(segment))
         for parsedword in segment:
-            print "        "+repr(parsedword)
-
-        seg_results = segment.valid_parses()
+            print "\t\tNode:", repr(parsedword.originalword)
+            for parse in parsedword.parses:
+                print "\t\t\t" + str(parse)
+        
+        seg_results = segment.valid_parses(context, filter_incomplete)
         if seg_results:
             print "        scr\tresult"
             for result, score in seg_results[:20]:
@@ -236,7 +238,7 @@ def run_tests(opts, test_cases):
 
         if expected_results is None:
             num_segments_run += 1
-            if len(segments) > 0:
+            if some(lambda s: s.valid_parses(now, True), segments):
                 num_tests_failed += 1
                 num_segments_failed += 1
                 if not opts.summary_only:
