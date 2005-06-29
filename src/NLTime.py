@@ -372,6 +372,11 @@ def is_ordinal(text):
     try:
         return ordinals.index(text) + 1
     except ValueError:
+        without_suffix = ordinals_re.sub('', text)
+        if ordinals_re.search(text):
+            # this will return None if it's not a number, which is what we want
+            i = is_int(without_suffix)
+            return i
         return None
 
 # a list of all token parsers
@@ -636,6 +641,9 @@ class SegmentInterpretation(tuple):
             return None
 
         offset = self.parsedict.get('ordinal')
+        if offset is not None:
+            offset -= 1
+
         if self.parsedict.get('relative') == 'last':
             offset = offset or 0
             # last means go from 0 (first) to -1, from 1 (second) to -2
@@ -657,7 +665,10 @@ class SegmentInterpretation(tuple):
                 days.append(dt)
                 dt = dt + datetime.timedelta(days=7)
 
-            return PartialTime.from_object(days[offset])
+            try:
+                return PartialTime.from_object(days[offset])
+            except IndexError:
+                pass
 
         return None
 

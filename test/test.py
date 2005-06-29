@@ -178,6 +178,13 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
 
     "Friday september 30th" : datetime.date(2005, 9, 30),
 
+    # TODO need to make sure we fix the context to 2005 for these
+    "third wed in march 2005" : datetime.date(2005, 3, 16),
+    "3rd wed in march 2005" : datetime.date(2005, 3, 16),
+    "3rd wed in march" : datetime.date(2005, 3, 16),
+    "last wed in march" : datetime.date(2005, 3, 30),
+    "first wed in march" : datetime.date(2005, 3, 2),
+
     "0;" : None,
     "1px" : None,
     "9=20" : None,
