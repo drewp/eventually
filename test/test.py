@@ -235,13 +235,15 @@ def run_tests(opts, test_cases):
         num_tests_run += 1
 
         if expected_results is None:
+            num_segments_run += 1
             if len(segments) > 0:
                 num_tests_failed += 1
+                num_segments_failed += 1
                 if not opts.summary_only:
                     report_test(test_case, segments, [], [],
                                 msg="Parse found %s segments but there should "
                                 "have been none" % len(segments))
-                continue
+            continue
 
         # listify the test case if we haven't already
         if not isinstance(expected_results, (list, tuple)):
@@ -253,7 +255,6 @@ def run_tests(opts, test_cases):
 
         num_segments_run += len(expected_results)
 
-            
         for segment in segments:
             seg_results = segment.valid_parses(context=now)
             if seg_results:
