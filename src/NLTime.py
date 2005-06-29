@@ -107,7 +107,7 @@ def is_dayofweek(text):
     if len(text) < 3:
         return None
     for day in days_of_week:
-        if (text in day) or (len(day) < len(text) and day in text):
+        if (day.find(text) == 0) or (len(day) < len(text) and day in text):
             return days_of_week.index(day) + 1
 
 def is_month(text):
