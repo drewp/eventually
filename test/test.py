@@ -124,7 +124,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
         datetime.datetime(2005, 5, 31, 16, 0),
 
     "On 5/27/05, Robert Lynch <robert.ly...@gmail.com> wrote:" :
-        datetime.datetime(2005, 5, 27),
+        datetime.date(2005, 5, 27),
 
     # XXX another tricky range one
     """ACM SIGGRAPH, SIGCHI and AIGA have announced the 2nd international DUX
@@ -138,9 +138,9 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     2005/6/17 morning, no night
     2005/6/18 night show
     2005/6/19 14:00-23:00 show""" : 
-        [datetime.datetime(2005, 6, 16),
-         datetime.datetime(2005, 6, 17),
-         datetime.datetime(2005, 6, 18),
+        [datetime.date(2005, 6, 16),
+         datetime.date(2005, 6, 17),
+         datetime.date(2005, 6, 18),
          # XXX this last one should be a range
          datetime.datetime(2005, 6, 19, 14, 0)],
             
