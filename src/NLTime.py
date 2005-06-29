@@ -2,6 +2,7 @@ import re, calendar, datetime
 from PartialTime import PartialTime
 from AIMA import *
 
+# TODO distinguish between the main parser and token parsers
 # TODO make range objects (which are just 2 times/dates/datetimes)
 # datetime + datetime
 # date + date
@@ -327,7 +328,7 @@ def is_range(text):
                         if rparse <= lparse:
                             continue
                     results.append((ltype, lparse, rparse))
-        print 'results', results
+        # print 'results', results
         return results # these will need to be in a different format
 
 def is_locpiece(text):
@@ -455,7 +456,7 @@ class Segment(list):
         # head is compatible with every tail
         return every(lambda tail: pieces_compatible(head, tail), tails)
 
-    def valid_parses(self, context=None):
+    def valid_parses(self, context=None, filter_incomplete=True):
         """Returns all valid parses and their score, ordered by score.
         ((parse1, score1), (parse2, score2), ...)"""
         context = context or PartialTime.now()
@@ -471,8 +472,10 @@ class Segment(list):
             # print "score", score
             # print "result", repr(result)
             if score > 0 and result:
+                if filter_incomplete and not result.is_interpretable():
+                    continue
                 interpretable_parses.append((score, result))
-
+        
         scores = {} # interp : best score
         for score, interp in interpretable_parses:
             if (interp in scores and score > scores[interp]) or \

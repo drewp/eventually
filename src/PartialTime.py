@@ -187,6 +187,10 @@ class PartialTime:
             dt = datetime.datetime.combine(d, t)
 
         return dt
+    def is_interpretable(self):
+        """Whether this PartialTime is interpretable as a complete date
+        or time.  Returns a boolean."""
+        return bool(self.as_date() or self.as_time())
 
     def is_valid(self):
         "Returns whether this PartialTime makes sense."

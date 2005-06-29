@@ -256,7 +256,10 @@ def run_tests(opts, test_cases):
         num_segments_run += len(expected_results)
 
         for segment in segments:
-            seg_results = segment.valid_parses(context=now)
+            # we don't filter out incomplete parses since some test cases have
+            # incomplete answers
+            seg_results = segment.valid_parses(context=now, 
+                                               filter_incomplete=False)
             if seg_results:
                 for rank, (result, score) in enumerate(seg_results[:20]):
                     if result in unmatched_results:
