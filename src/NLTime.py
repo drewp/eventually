@@ -90,7 +90,7 @@ punc_end_re = re.compile(r'%s+$' % punc)
 ws_split = re.compile(r'\s')
 
 ordinals_re = re.compile(r'st|nd|rd|th', re.I)
-time_re = re.compile(r'(\d{1,2})(?:\:?(\d+))?(?:\:?(\d+))?\s*([AP]\.?M\.?)?', re.I)
+time_re = re.compile(r'^(\d{1,2})(?:\:?(\d+))?(?:\:?(\d+))?\s*([AP]\.?M\.?)?$', re.I)
 
 # Some date examples:
 # 5/27, 6.01.2004, 6.1.2004, 1-2-1981, 1-2-03
