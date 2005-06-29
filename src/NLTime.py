@@ -515,20 +515,15 @@ class SegmentInterpretation(tuple):
         score = self.grammar_score()
         # print "score", self.parsedict, repr(result)
         if 'dayofweek' in self.parsedict and 'month' in self.parsedict:
-            if isinstance(result, (datetime.date, datetime.datetime)):
-                try:
-                    # they're 0-based, we're 1-based
-                    year, month, day = result.year, result.month, result.day
-                    dayofweek = self.parsedict['dayofweek']
-                    realdayofweek = result.weekday() + 1
-                    if realdayofweek == dayofweek:
-                        score += 40
-                    else:
-                        return (0, result)
-                except AttributeError:
-                    pass
-            else: # if we have a dayofweek, we better use it
-                return (0, result)
+            try:
+                # they're 0-based, we're 1-based
+                year, month, day = result.year, result.month, result.day
+                dayofweek = self.parsedict['dayofweek']
+                realdayofweek = result.weekday() + 1
+                if realdayofweek == dayofweek:
+                    score += 10
+            except AttributeError:
+                pass
 
         # extra points for having these objects complete
         d = result.as_date()
@@ -579,7 +574,8 @@ class SegmentInterpretation(tuple):
                 self.parsedict['minute'] = 0
 
         for expfunc in (self.expand_day_relatives, 
-                          self.expand_dayofweek_with_relatives):
+                        self.expand_dayofweek_with_relatives,
+                        self.expand_ordinal_dow_month):
             expansion = expfunc(context)
             if expansion is not None:
                 return expansion
@@ -627,6 +623,41 @@ class SegmentInterpretation(tuple):
                 return pt_without_dow.combine(relative_pt)
             except ValueError:
                 pass
+
+        return None
+
+    def expand_ordinal_dow_month(self, context):
+        # adapted from Mark Pettit's "Findng the x'th day in a month" 
+        # cookbook recipe, seen at
+        # http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/425607
+
+        if not (self.parsedict.get('month') and 
+                self.parsedict.get('dayofweek')):
+            return None
+
+        offset = self.parsedict.get('ordinal')
+        if self.parsedict.get('relative') == 'last':
+            offset = offset or 0
+            # last means go from 0 (first) to -1, from 1 (second) to -2
+            # (second to last), etc.
+            offset += 1
+            offset *= -1
+
+        if offset is not None:
+            # if year is present, we use it, otherwise, we get it from context
+            year = self.parsedict.get('year', context.year)
+            month = self.parsedict['month']
+            dayofweek = self.parsedict['dayofweek'] - 1
+            
+            dt = datetime.date(year, month, 1)
+            days = [] # list of days with the right dayofweek
+            while dt.weekday() != dayofweek:
+                dt = dt + datetime.timedelta(days=1)
+            while dt.month == month:
+                days.append(dt)
+                dt = dt + datetime.timedelta(days=7)
+
+            return PartialTime.from_object(days[offset])
 
         return None
 
