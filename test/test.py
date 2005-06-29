@@ -192,9 +192,9 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
 def report_test(test_case, segments, expected_results, unmatched_results,
                 msg="", context=now, filter_incomplete=False):
     print "Test case:"
-    print "    "+repr(test_case)
+    print "\t" + repr(test_case)
     for num, segment in enumerate(segments):
-        print "    Segment %d: %r" % (num, str(segment))
+        print "\tSegment %d: %r" % (num, str(segment))
         for parsedword in segment:
             print "\t\tNode:", repr(parsedword.originalword)
             for parse in parsedword.parses:
@@ -202,25 +202,30 @@ def report_test(test_case, segments, expected_results, unmatched_results,
         
         seg_results = segment.valid_parses(context, filter_incomplete)
         if seg_results:
-            print "        scr\tresult"
+            print "\t\tScore\tInterpretation"
             for result, score in seg_results[:20]:
-                print "        %s\t%s" % (score, result),
+                print "\t\t%s\t%s" % (score, result),
                 if result in expected_results:
                     print "<=="
                 else:
                     print
-
-    print "    Unmatched results:", unmatched_results
-    if msg:
-        print "    "+msg
-    print
+        else:
+            print "\t\t(no interpretations)"
+        print
     
+    if unmatched_results:
+        print "\tUnmatched results:"
+        for result in unmatched_results:
+            print '\t' + repr(result)
+    if msg:
+        print "\t" + msg
+    print
 
 def run_tests(opts, test_cases):
     # so the test cases have a consistent ordering
     test_cases = test_cases.items()
     test_cases.sort()
-
+    
     ranks = []
     num_tests_failed = 0
     num_tests_run = 0
@@ -231,11 +236,11 @@ def run_tests(opts, test_cases):
         # result object hasn't been built yet, e.g. ranges)
         if expected_results is NotImplementedError:
             continue
-
+        
         parse = Parse(test_case)
         segments = parse.segments
         num_tests_run += 1
-
+        
         if expected_results is None:
             num_segments_run += 1
             if some(lambda s: s.valid_parses(now, True), segments):
@@ -243,20 +248,21 @@ def run_tests(opts, test_cases):
                 num_segments_failed += 1
                 if not opts.summary_only:
                     report_test(test_case, segments, [], [],
-                                msg="Parse found %s segments but there should "
-                                "have been none" % len(segments))
+                                msg="Parse found %s segment(s) but there "
+                                "should have been none." % len(segments), 
+                                filter_incomplete=True)
             continue
-
+        
         # listify the test case if we haven't already
         if not isinstance(expected_results, (list, tuple)):
             expected_results = [expected_results,]
-
+        
         expected_results = [PartialTime.from_object(res) 
             for res in expected_results]
         unmatched_results = list(expected_results) # a copy that we'll modify
-
+        
         num_segments_run += len(expected_results)
-
+        
         for segment in segments:
             # we don't filter out incomplete parses since some test cases have
             # incomplete answers
@@ -267,16 +273,16 @@ def run_tests(opts, test_cases):
                     if result in unmatched_results:
                         unmatched_results.remove(result)
                         ranks.append(rank)
-
+        
         num_segments_failed += len(unmatched_results)
-
+        
         if unmatched_results or opts.verbose:
             if unmatched_results:
                 num_tests_failed += 1
             if not opts.summary_only:
                 report_test(test_case, segments,
                             expected_results, unmatched_results)
-
+    
     print "Summary:"
     print "Ran %d tests, %d failed." % (num_tests_run, num_tests_failed)
     print "Ran %d segment tests, %d failed." % (num_segments_run, 
@@ -286,7 +292,6 @@ def run_tests(opts, test_cases):
     print 'Distribution:', ', '.join([str(pair) for pair in histogram(ranks)])
     print "Average rank: %.5f, stddev %.5f" % (average,
                                                stddev(ranks, meanval=average))
-
 
 parser = optparse.OptionParser()
 parser.add_option("-v", "--verbose", action="store_true")
