@@ -358,8 +358,8 @@ def is_relative(text):
 
         return text
 
-ordinals = ('first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',
-            'eigth', 'ninth', 'tenth')
+ordinals = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',
+            'eigth', 'ninth', 'tenth']
 
 def is_ordinal(text):
     """Attempts to return a normalized ordinal number or None if the
