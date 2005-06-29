@@ -65,6 +65,7 @@ common_orders = [
     "month year hour minute",
     "month year hour minute ampm",
     "month day",
+    "month day year",
     "month year",
     "month",
     "year",
