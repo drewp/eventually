@@ -2,18 +2,18 @@ import Tix as Tk
 import NLTime
 from BetterText import AutoscrollbarText
 from Utility import Symbol
+from dispatch import dispatcher
 
 import md5
 def getsignature(contents):
     return md5.md5(contents).digest()
 
-NotPresent = Symbol('NotPresent')
+NotPresent = Symbol('(Not Present)')
 
 class TkTime(AutoscrollbarText):
     def __init__(self, master, **kw):
         kw.setdefault('font', 'Courier 12')
-        self.command = kw.pop('command', None)
-        self.parses_callback = kw.pop('parses_callback', None)
+        self.special_symbols = kw.pop('special_symbols', [])
         self.time_context = kw.pop('context', None)
         self.selected_color = kw.pop('selected_color', 'red')
         self.parsed_color = kw.pop('parsed_color', 'lightblue')
@@ -49,6 +49,7 @@ class TkTime(AutoscrollbarText):
         self.tags = []
         parse = NLTime.Parse(text)
         segments = parse.segments
+        dispatcher.send("new parses", segments=segments, sender=self)
         for segmentnum, segment in enumerate(segments):
             valid_parses = segment.valid_parses(context=self.time_context)
             start, end = segment.extent()
@@ -66,8 +67,10 @@ class TkTime(AutoscrollbarText):
             else:
                 self.text.tag_config(tag, background=self.unparsed_color)
             self.add_tag(tag, start, end)
-            if self.parses_callback:
-                self.parses_callback(segmentnum, segment, valid_parses)
+            dispatcher.send("new segment parses", segmentnum=segmentnum, 
+                segment=segment, parses=valid_parses, sender=self)
+        if not segments:
+            dispatcher.send("no parses", sender=self)
     def add_tag(self, tag, start, end):
         self.text.tag_add(tag, start, end)
         self.tags.append(tag)
@@ -82,10 +85,10 @@ class TkTime(AutoscrollbarText):
             else:
                 self.text.tag_config(tag, background=self.selected_color,
                     borderwidth=1, relief='raised')
-            if self.command:
-                self.command(tagnum, parse)
             # remember our selection
             self.selections[str(segment)] = parse
+            dispatcher.send("selection made", segment=segment, selection=parse,
+                tag=tag, segmentnum=tagnum, sender=self)
 
         def hover(mouseisover=False):
             if mouseisover:
@@ -97,8 +100,8 @@ class TkTime(AutoscrollbarText):
             popup.add_command(label="%s (%s)" % (parse, score), 
                 command=lambda parse=parse: select(parse))
 
-        popup.add_command(label='(Not present)', 
-            command=lambda: select(NotPresent))
+        for sym in self.special_symbols:
+            popup.add_command(label=str(sym), command=lambda: select(sym))
         popup.add_command(label='(Ignore)', command=lambda: select(None))
 
         def do_popup(event):
@@ -115,9 +118,12 @@ class TkTime(AutoscrollbarText):
 
         return popup
     def remove_popups(self, event):
+        """Get rid of all popups"""
         for popup in self.popups:
             popup.unpost()
     def sched_update(self, *args, **kw):
+        """Call update_display in the future.  If a call was already
+        scheduled, we push it back."""
         force_update = kw.pop('force_update', False)
         if self.scheduled_update:
             self.after_cancel(self.scheduled_update)
@@ -127,17 +133,21 @@ class TkTime(AutoscrollbarText):
         self.display_parses(self.text.get('0.0', 'end'), force_update)
 
 class TkTimeWithContext(Tk.Frame):
-    def __init__(self, master, command=None):
+    def __init__(self, master):
         Tk.Frame.__init__(self, master)
         self.tktime = TkTime(self, bg='black', fg='white', 
-            insertbackground='white', parsed_color='blue', command=command)
+            insertbackground='white', parsed_color='blue',
+            special_symbols=[NotPresent])
         self.tktime.pack(side='top', fill='both', expand=1)
 
         contextframe = Tk.Frame(self)
         contexttext = Tk.Label(contextframe, text='Context')
         contexttext.pack(side='left', ipadx=0, ipady=0, padx=0, pady=0)
-        self.context = TkTime(contextframe, command=self.context_selector,
-            parses_callback=self.context_has_parses)
+        self.context = TkTime(contextframe)
+        dispatcher.connect(self.context_selector, "selection made", 
+            sender=self.context)
+        dispatcher.connect(self.context_has_parses, "new segment parses",
+            sender=self.context)
         self.context['height'] = 23 # errr...
         self.context.pack(side='left', fill='x', expand=0)
         self.contextlabel = Tk.Label(contextframe)
@@ -154,7 +164,7 @@ class TkTimeWithContext(Tk.Frame):
         if context is None or (context.as_date() or context.as_time()):
             self.tktime.time_context = context
             self.tktime.sched_update(force_update=True)
-        if context and context is not NotPresent:
+        if context:
             self.contextlabel['text'] = str(context)
         else:
             self.contextlabel['text'] = ""
