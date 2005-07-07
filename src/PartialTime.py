@@ -179,13 +179,17 @@ class PartialTime:
                 break
             else:
                 args.append(val or 0)
-        return datetime.time(*args)
+        if args:
+            return datetime.time(*args)
+        else:
+            return None
     def as_datetime(self):
         dt = None
         d = self.as_date()
         if d:
             t = self.as_time()
-            dt = datetime.datetime.combine(d, t)
+            if t is not None:
+                dt = datetime.datetime.combine(d, t)
 
         return dt
     def is_interpretable(self):
