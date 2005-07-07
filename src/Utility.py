@@ -1,3 +1,4 @@
+from __future__ import nested_scopes
 import os, sys, weakref
 from gzip import GzipFile
 
@@ -121,6 +122,27 @@ def read_file_with_timeout(fileobject, timeout=1):
 # sequences #
 #############
 
+# from http://www.hetland.org/python/distance.py
+def edit_distance(a,b):
+    "Calculates the Levenshtein distance between a and b."
+    n, m = len(a), len(b)
+    if n > m:
+        # Make sure n <= m, to use O(min(n,m)) space
+        a, b = b, a
+        n, m = m, n
+        
+    current = range(n+1)
+    for i in range(1,m+1):
+        previous, current = current, [i]+[0]*m
+        for j in range(1,n+1):
+            add, delete = previous[j]+1, current[j-1]+1
+            change = previous[j-1]
+            if a[j-1] != b[i-1]:
+                change = change + 1
+            current[j] = min(add, delete, change)
+            
+    return current[n]
+
 def power_set(seq):
     """Returns the power set of an (indexable) sequence."""
     return seq \
@@ -128,7 +150,8 @@ def power_set(seq):
            or [seq]
 
 # TODO the following two functions should be more similar
-# also, they should accept
+# also, they should work the same way as the real max and min in terms
+# of arguments
 def maxwithundef(*args, **kw):
     """Optional keyword argument: undef.  Use this to specify an undefined 
     value.  Any argument with that value will be dropped.  If there are no
@@ -260,7 +283,8 @@ def dumpobj(o, double_underscores=0):
             pass
     print ""
 
-def trace(func):
+_count = 0 # certainly not thread safe
+def trace(func, stream=sys.stdout):
     """Good old fashioned Lisp-style tracing.  Example usage:
     
     >>> def f(a, b, c=3):
@@ -275,19 +299,22 @@ def trace(func):
     <<| f returned 3
     3
 
-    TODO: print out default keywords (maybe)
-          indent for recursive call like the lisp version (possible use of 
-              generators?)"""
+    TODO: print out default keywords (maybe)"""
     name = func.func_name
+    global _count
+    _count = 0
     def tracer(*args, **kw):
-        s = '|>> %s called' % name
+        global _count
+        s = ('\t' * _count) + '|>> %s called with' % name
+        _count += 1
         if args:
             s += ' args: %r' % list(args)
         if kw:
             s += ' kw: %r' % kw
-        print s
+        print >>stream, s
         ret = func(*args, **kw)
-        print '<<| %s returned %s' % (name, ret)
+        _count -= 1
+        print >>stream, ('\t' * _count) + '<<| %s returned %s' % (name, ret)
         return ret
     return tracer
 
