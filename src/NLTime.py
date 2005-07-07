@@ -351,8 +351,8 @@ def is_relative(text):
     text = text.lower()
     text = punc_re.sub('', text)
     if text in ['next', 'last', 'this', 'upcoming', 'previous', 'following',
-                'today', 'tomorrow', 'yesterday', 'morning', 'afternoon', 
-                'evening', 'now']:
+                'today', 'tonight', 'tomorrow', 'yesterday', 'morning', 
+                'afternoon', 'evening', 'night', 'now']:
         # normalize some of these
         text = text.replace('following', 'next')
         text = text.replace('upcoming', 'this')
@@ -590,13 +590,15 @@ class SegmentInterpretation(tuple):
             return pt
 
     def expand_day_relatives(self, context):
-        """Expands 'yesterday', 'today', 'tomorrow', and 'now'."""
+        """Expands 'yesterday', 'today', 'tonight', 'tomorrow', and 'now'."""
         if 'relative' in self.parsedict:
             rel = self.parsedict['relative']
             try:
                 if rel == 'now':
                     return context
 
+                if rel == 'tonight':
+                    rel = 'today'
                 day_offset = ['yesterday', 'today', 'tomorrow'].index(rel) - 1
                 day_delta = datetime.timedelta(days=day_offset)
                 original = PartialTime.from_object(self.parsedict)
