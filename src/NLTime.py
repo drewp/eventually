@@ -488,17 +488,28 @@ class Segment(list):
                (interp not in scores):
                 scores[interp] = score
 
-        # sort by scores then by distance to the context
-        def sortkey((parse, score)):
-            try:
-                delta = parse - context
-                days, secs = -abs(delta.days), -abs(delta.seconds)
-            except TypeError:
-                days, secs = None, None # None is less than all numbers
-            return (score, days, secs)
-        
-        parses = sorted(scores.items(), key=sortkey, reverse=True)
+        parses = sortedtimes(scores.items(), context)
         return parses
+
+# let's do the Time Sort again!
+def sortedtimes(times_and_scores, context=None):
+    """Sort times by score then by distance to the context.
+    times_and_scores is a list of tuples of (PartialTime object, score).
+    context is a PartialTime or None (for "now").  Returns a list in the
+    same format as times_and_scores (but a potentially different order)"""
+    # sort by scores then by distance to the context
+    def sortkey((parse, score)):
+        try:
+            delta = parse - context
+            days, secs = -abs(delta.days), -abs(delta.seconds)
+        except TypeError: # things that are incomparable raise a TypeError
+            days, secs = None, None # None is less than all numbers
+        return (score, days, secs)
+    
+    sorted_times_and_scores = sorted(times_and_scores, key=sortkey, 
+        reverse=True)
+
+    return sorted_times_and_scores
 
 class SegmentInterpretation(tuple):
     def __init__(self, *args):
