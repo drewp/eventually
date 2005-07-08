@@ -1,5 +1,6 @@
 import Tix as Tk
 from dispatch import dispatcher
+import NLTime
 from TkTime import TkTimeWithContext
 from Utility import make_attributes_from_args
 
@@ -20,9 +21,9 @@ class Bin(Tk.Frame):
         self.strings_to_parse = {}
     def draw(self):
         self.listbox.delete(0, 'end')
-        for score, parse in self.contents:
+        for parse, score in self.contents:
             s = str(parse)
-            self.combo.add_history(s)
+            self.combo.append_history(s)
             self.strings_to_parse[s] = parse
 
         if self.contents:
@@ -58,17 +59,17 @@ class TkEventMaker(TkTimeWithContext):
                 method = getattr(parse, "as_%s" % bin_name.lower())
                 result = method()
                 if result:
-                    bin.contents.append((score, result))
+                    bin.contents.append((result, score))
                     break
         self.draw_bins()
     def draw_bins(self):
         for bin in self.bins_sorted:
-            bin.contents.sort()
+            bin.contents = NLTime.sortedtimes(bin.contents)
             bin.draw()
 
 if __name__ == "__main__":
     root = Tk.Tk()
-    root.title("The Event Maketron")
+    root.title("EventMaster 6000")
     tktimewithcontext = TkEventMaker(root)
     tktimewithcontext.pack(fill='both', expand=1)
     Tk.mainloop()
