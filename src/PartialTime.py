@@ -88,6 +88,9 @@ class PartialTime:
                             pass
                     return result
                 else:
+                    # TODO actually, we should try to do partial comparisons
+                    # if each side has exactly the same amount of information
+                    # PartialTime(month=5, day=2) < PartialTime(month=5, day=7)
                     raise TypeError("Insufficient information in the PartialTimes for '-' operation.")
             return func
         # simple operations on datetime objects

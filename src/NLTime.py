@@ -39,22 +39,26 @@ And should add:
 
 # some scoring information
 piecetype_scores = {
-    'dayofweek' : 5, 
+    'dayofweek' : 5,
     'date' : 5,
-    'time' : 5, 
-    'month' : 4, 
-    'day' : 3, 
+    'time' : 5,
+    'month' : 4,
+    'day' : 3,
     'year' : 2,
-    'ampm' : 5, 
+    'ampm' : 5,
 
     # we'd like to have these rather than not, but they're generally less
     # informative
-    'relative' : 2, 
-    'int' : 0, 
-    'locpiece' : 1, 
-    'lochint' : 1, 
-    'timehint' : 1, 
-    'rangehint' : 1
+    'relative' : 2,
+    'int' : 0,
+    'locpiece' : 1,
+    'lochint' : 1,
+    'timehint' : 1,
+    'rangehint' : 1,
+
+    # other parsers
+    'dateutil_parseable' : 0,
+    'mx_parseable' : 0,
 }
 common_orders = [
     "dayofweek month day year",
@@ -426,8 +430,11 @@ class ParsedWord:
                                        self.wordnum, str(self.parses))
 
 class Segment(list):
-    """A consequtive sequence of ParsedWord objects.  Subclass of a list,
-    so all list methods will work."""
+    """A consecutive sequence of ParsedWord objects.  It is a subclass
+    of a list, so all list methods will work."""
+    def __init__(self, l=None):
+        list.__init__(self, l or [])
+        self.context = None
     def __str__(self):
         """Returns a string of all words in this Segment."""
         return ' '.join([parsedword.originalword for parsedword in self])
@@ -709,8 +716,9 @@ def cartesianproduct(lists, keep_func=None, allow_empty_column=True):
     words, if our lists are (A, B, C), A=1,2,3, B=4,5,6, C=7,8,9, we will
     compute all products of the list: (1, 4, 7), (1, 4, 8), ... (3, 6, 9)
 
-    keep_func is a function that tells use if we want to keep a
-    product.
+    keep_func is a function for pruning that tells use if we want to
+    keep a product.  It is called on a sequence of items in the list
+    and returns a boolean.
     
     allow_empty_column means that we can optionally omit a list, making
     this function more like an ordered power set."""
@@ -737,21 +745,25 @@ def cartesianproduct(lists, keep_func=None, allow_empty_column=True):
         return all
 
 class Parse:
+    """The main interface to Eventually.  Given text and an optional
+    context, parses the text into segments (accessible under the
+    attribute segments)."""
     def __init__(self, text, context=None):
-        self.context = context
-        self.parse(text)
-    def parse(self, text):
         self.segments = []
+        self.context = context
+
         cur_segment = Segment()
         charnum = 0
         for linenum, line in enumerate(text.splitlines()):
             if cur_segment:
-                # new segment per line
+                # new segment since segments don't span lines (they may get
+                # recombined later)
                 self.segments.append(cur_segment)
                 cur_segment = Segment()
             colnum = 0
             wordnum = 0
             for word in ws_split.split(line):
+                # empty words really mean space
                 if not word:
                     colnum += 1
                     charnum += 1
