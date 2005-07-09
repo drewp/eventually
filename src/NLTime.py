@@ -1,5 +1,5 @@
 import re, calendar, datetime
-from PartialTime import PartialTime
+from PartialTime import PartialTime, partialtime_attrs
 from AIMA import *
 
 # TODO distinguish between the main parser and token parsers
@@ -560,26 +560,19 @@ class SegmentInterpretation(tuple):
         """In this method, we attempt to convert this SegmentInterpretation
         into a PartialTime.  We use context to try to fill in missing
         information.  Relative markers are expanded here."""
-        # expand 'time' and 'date'
-        if 'time' in self.parsedict:
-            t = self.parsedict['time']
-            try:
-                self.parsedict['hour'] = t.hour
-                self.parsedict['minute'] = t.minute
-                self.parsedict['second'] = t.second
-                del self.parsedict['time']
-            except AttributeError:
-                pass
-            
-        if 'date' in self.parsedict:
-            d = self.parsedict['date']
-            try:
-                self.parsedict['year'] = d.year
-                self.parsedict['month'] = d.month
-                self.parsedict['day'] = d.day
-                del self.parsedict['date']
-            except AttributeError:
-                pass
+        # we run through all items and expand all date, datetimes, and times
+        # (or anything with the right attributes)
+        for tokenparser, result in self:
+            # datetime.datetime is a child of datetime.date, so this covers
+            # all three of them
+            for attr in partialtime_attrs:
+                try:
+                    if attr not in self.parsedict:
+                        expansion = getattr(result, attr)
+                        if expansion is not None:
+                            self.parsedict[attr] = expansion
+                except AttributeError:
+                    pass
 
         # fill in the current year if we don't have it but have part of a date
         if self.parsedict.get('month') is not None:
