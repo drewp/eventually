@@ -296,7 +296,7 @@ def is_ampm(text):
 def is_timehint(text):
     text = text.lower()
     text = punc_re.sub('', text)
-    if text in ['at', 'from', 'night', 'day']:
+    if text in ['at', 'from', 'night', 'day', 'is', 'of']:
         return text
 
 def is_rangehint(text):

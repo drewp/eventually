@@ -185,6 +185,10 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     "last wed in march" : datetime.date(2005, 3, 30),
     "first wed in march" : datetime.date(2005, 3, 2),
 
+    # TODO put tz in when we handle time zones
+    "Today is 25 of September of 2003, exactly at 10:49:41 with timezone -03:00." : datetime.datetime(2003, 9, 25, 10, 49, 41),
+
+    # some "negative" tests (there should be no interpretations of these)
     "0;" : None,
     "1px" : None,
     "9=20" : None,
