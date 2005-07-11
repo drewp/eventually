@@ -47,11 +47,11 @@ class TkTime(AutoscrollbarText):
         self.popups = []
 
         self.tags = []
-        parse = NLTime.Parse(text)
+        parse = NLTime.Parse(text, context=self.time_context)
         segments = parse.segments
         dispatcher.send("new parses", segments=segments, sender=self)
         for segmentnum, segment in enumerate(segments):
-            valid_parses = segment.valid_parses(context=self.time_context)
+            valid_parses = segment.valid_parses()
             start, end = segment.extent()
             start = ("%d.%d" % start)
             end = ("%d.%d" % end)

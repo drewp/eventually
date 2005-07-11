@@ -59,14 +59,14 @@ class TrainedParse:
         ranges = []
         for seg in self.parse.segments:
             s,e = seg.extent(charindices=True)
-            tm = seg.valid_parses(self.context)[0][0]
+            tm = seg.valid_parses()[0][0]
             if (s,e) in self.hiddenRanges or (s,e) in self.corrections:
                 continue
             ranges.append(((s,e), tm))
 
         for (s,e),text in self.corrections.items():
             p = Parse(self.corrections[(s,e)], self.context)
-            tm = p.segments[0].valid_parses(self.context)[0][0]
+            tm = p.segments[0].valid_parses()[0][0]
             ranges.append(((s,e), tm))
 
         ranges.sort()

@@ -201,7 +201,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
 }
 
 def report_test(test_case, segments, expected_results, unmatched_results,
-                msg="", context=now, filter_incomplete=False):
+                msg="", filter_incomplete=False):
     print "Test case:"
     print "\t" + repr(test_case)
     for num, segment in enumerate(segments):
@@ -211,7 +211,7 @@ def report_test(test_case, segments, expected_results, unmatched_results,
             for parse in parsedword.parses:
                 print "\t\t\t" + str(parse)
         
-        seg_results = segment.valid_parses(context, filter_incomplete)
+        seg_results = segment.valid_parses(filter_incomplete)
         if seg_results:
             print "\t\tScore\tInterpretation"
             for result, score in seg_results[:20]:
@@ -248,13 +248,13 @@ def run_tests(opts, test_cases):
         if expected_results is NotImplementedError:
             continue
         
-        parse = Parse(test_case)
+        parse = Parse(test_case, context=now)
         segments = parse.segments
         num_tests_run += 1
         
         if expected_results is None:
             num_segments_run += 1
-            if some(lambda s: s.valid_parses(now, True), segments):
+            if some(lambda s: s.valid_parses(True), segments):
                 num_tests_failed += 1
                 num_segments_failed += 1
                 if not opts.summary_only:
@@ -277,8 +277,7 @@ def run_tests(opts, test_cases):
         for segment in segments:
             # we don't filter out incomplete parses since some test cases have
             # incomplete answers
-            seg_results = segment.valid_parses(context=now, 
-                                               filter_incomplete=False)
+            seg_results = segment.valid_parses(filter_incomplete=False)
             if seg_results:
                 for rank, (result, score) in enumerate(seg_results[:20]):
                     if result in unmatched_results:

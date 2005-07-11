@@ -1,4 +1,4 @@
-import re, calendar, datetime
+import re, calendar, datetime, weakref
 from PartialTime import PartialTime, partialtime_attrs
 from AIMA import *
 
@@ -430,11 +430,15 @@ class ParsedWord:
                                        self.wordnum, str(self.parses))
 
 class Segment(list):
-    """A consecutive sequence of ParsedWord objects.  It is a subclass
-    of a list, so all list methods will work."""
-    def __init__(self, l=None):
+    """A consecutive sequence of ParsedWord objects.  It is a subclass of
+    a list, so all list methods will work.  parseobj is a the Parse object
+    that contains this Segment.  Context and other scoring information
+    will be retrieved from the parseobj."""
+    def __init__(self, l=None, parseobj=None):
         list.__init__(self, l or [])
-        self.context = None
+        # we run into problems if a Segment outlives the Parse that it lives
+        # in, but I'm not sure how to deal with that situation yet.
+        self.parseobj = weakref.proxy(parseobj)
     def __str__(self):
         """Returns a string of all words in this Segment."""
         return ' '.join([parsedword.originalword for parsedword in self])
@@ -469,10 +473,10 @@ class Segment(list):
         # head is compatible with every tail
         return every(lambda tail: pieces_compatible(head, tail), tails)
 
-    def valid_parses(self, context=None, filter_incomplete=True):
+    def valid_parses(self, filter_incomplete=True):
         """Returns all valid parses and their score, ordered by score.
         ((parse1, score1), (parse2, score2), ...)"""
-        context = context or PartialTime.now()
+        context = self.parseobj.context
 
         interpretable_parses = []
         all_parses = cartesianproduct([node.parses for node in self],
@@ -752,14 +756,14 @@ class Parse:
         self.segments = []
         self.context = context
 
-        cur_segment = Segment()
+        cur_segment = Segment(parseobj=self)
         charnum = 0
         for linenum, line in enumerate(text.splitlines()):
             if cur_segment:
                 # new segment since segments don't span lines (they may get
                 # recombined later)
                 self.segments.append(cur_segment)
-                cur_segment = Segment()
+                cur_segment = Segment(parseobj=self)
             colnum = 0
             wordnum = 0
             for word in ws_split.split(line):
@@ -774,7 +778,7 @@ class Parse:
                     cur_segment.append(p)
                 elif cur_segment:
                     self.segments.append(cur_segment)
-                    cur_segment = Segment()
+                    cur_segment = Segment(parseobj=self)
                 colnum += len(word) + 1
                 charnum += len(word) + 1
                 wordnum += 1
