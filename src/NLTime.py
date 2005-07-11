@@ -63,6 +63,7 @@ piecetype_scores = {
 common_orders = [
     "dayofweek month day year",
     "dayofweek month day",
+    "dayofweek day month year",
     "dayofweek day",
     "month year time",
     "month year hour",
