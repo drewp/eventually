@@ -74,6 +74,7 @@ common_orders = [
     "month",
     "year",
     "time",
+    "time ampm",
     'hour minute ampm',
     'hour minute second ampm',
     'hour minute',
