@@ -477,7 +477,7 @@ class Segment(list):
     def valid_parses(self, filter_incomplete=True):
         """Returns all valid parses and their score, ordered by score.
         ((parse1, score1), (parse2, score2), ...)"""
-        context = self.parseobj.context
+        context = self.parseobj.context or PartialTime.now()
 
         interpretable_parses = []
         all_parses = cartesianproduct([node.parses for node in self],
