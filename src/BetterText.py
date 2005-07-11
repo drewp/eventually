@@ -45,7 +45,7 @@ class BetterTextMixin:
     def find_word_backwards(self):
         """Finds the index of a word boundary before the insert cursor."""
         boundary = "0.0"
-        index = self.text.search('([\s\-\/\.])\S', 'insert', backwards=1, 
+        index = self.text.search('([\s\-\/\.])\S', 'insert', backwards=1,
             regexp=1, stopindex=boundary)
         if not index:
             index = boundary
@@ -55,7 +55,7 @@ class BetterTextMixin:
         boundary = "end"
         if self.text.index('insert + 1 chars') == self.text.index(boundary):
             return boundary
-        index = self.text.search('([\s\-\/\.])\S', 'insert + 1 chars', 
+        index = self.text.search('([\s\-\/\.])\S', 'insert + 1 chars',
             forwards=1, regexp=1, stopindex=boundary)
         if not index:
             index = boundary
@@ -112,18 +112,18 @@ class AutoscrollbarText(Tk.ScrolledText, BetterTextMixin):
         Tk.ScrolledText.__init__(self, *args, **kw)
         BetterTextMixin.__init__(self, self.text)
 
-        self.text.bind("<KeyRelease>", 
+        self.text.bind("<KeyRelease>",
             lambda event: self.auto_y_scrollbar())
-        self.text.bind("<<Paste>>", 
+        self.text.bind("<<Paste>>",
             lambda event: self.text.after(50, self.auto_y_scrollbar))
-        self.text.bind("<<PasteSelection>>", 
+        self.text.bind("<<PasteSelection>>",
             lambda event: self.text.after(50, self.auto_y_scrollbar))
 
         # we use a combination of Visibility and Expose to tell us about
         # resizes
-        self.bind("<Visibility>", 
+        self.bind("<Visibility>",
             lambda event: self.auto_y_scrollbar())
-        self.bind("<Expose>", 
+        self.bind("<Expose>",
             lambda event: self.auto_y_scrollbar())
     def auto_y_scrollbar(self):
         """Emulates -scrollbar "auto -x" (automatic Y, don't show X)
@@ -142,9 +142,9 @@ class AutoexpandText(Tk.Text, BetterTextMixin):
         BetterTextMixin.__init__(self, self)
 
         self.bind("<KeyRelease>", self.expand_height)
-        self.bind("<<Paste>>", 
+        self.bind("<<Paste>>",
             lambda event: self.after(50, self.expand_height, event))
-        self.bind("<<PasteSelection>>", 
+        self.bind("<<PasteSelection>>",
             lambda event: self.after(50, self.expand_height, event))
 
         self.expand_height()
@@ -175,7 +175,7 @@ class AutoexpandText(Tk.Text, BetterTextMixin):
         #       doing this resize, since it's flashy
         # these keys can decrease the number of lines visible and force
         # us to shrink the size of the
-        if event_name in ('Delete', 'BackSpace', 'Return', 'Control-x', 
+        if event_name in ('Delete', 'BackSpace', 'Return', 'Control-x',
                       'Control-k', 'Control-w', 'Control-d', 'Alt-d',
                       'Control-BackSpace', 'Paste', 'Manual'):
             text = self.get("0.0", 'end')

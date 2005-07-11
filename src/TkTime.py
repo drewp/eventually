@@ -25,9 +25,9 @@ class TkTime(AutoscrollbarText):
         self.scheduled_update = None
         self.text.bind('<KeyRelease>', self.sched_update, '+')
         # we have to wait about 50ms since the text won't appear until then
-        self.text.bind('<<Paste>>', 
+        self.text.bind('<<Paste>>',
             lambda evt: self.after(50, self.update_display), '+')
-        self.text.bind('<<PasteSelection>>', 
+        self.text.bind('<<PasteSelection>>',
             lambda evt: self.after(50, self.update_display), '+')
         self.text.bind('<ButtonRelease-3>', self.remove_popups)
 
@@ -61,13 +61,13 @@ class TkTime(AutoscrollbarText):
                     color = self.selected_color
                 else:
                     color = self.parsed_color
-                self.text.tag_config(tag, background=color, borderwidth=1, 
+                self.text.tag_config(tag, background=color, borderwidth=1,
                     relief='raised')
                 self.popups.append(self.make_menu(tag, segment, valid_parses))
             else:
                 self.text.tag_config(tag, background=self.unparsed_color)
             self.add_tag(tag, start, end)
-            dispatcher.send("new segment parses", segmentnum=segmentnum, 
+            dispatcher.send("new segment parses", segmentnum=segmentnum,
                 segment=segment, parses=valid_parses, sender=self)
         if not segments:
             dispatcher.send("no parses", sender=self)
@@ -97,7 +97,7 @@ class TkTime(AutoscrollbarText):
                 self.text.tag_config(tag, relief='raised')
 
         for parse, score in valid_parses[:limit]:
-            popup.add_command(label="%s (%s)" % (parse, score), 
+            popup.add_command(label="%s (%s)" % (parse, score),
                 command=lambda parse=parse: select(parse))
 
         for sym in self.special_symbols:
@@ -127,7 +127,7 @@ class TkTime(AutoscrollbarText):
         force_update = kw.pop('force_update', False)
         if self.scheduled_update:
             self.after_cancel(self.scheduled_update)
-        self.scheduled_update = self.after(50, self.update_display, 
+        self.scheduled_update = self.after(50, self.update_display,
             force_update)
     def update_display(self, force_update=False):
         self.display_parses(self.text.get('0.0', 'end'), force_update)
@@ -135,7 +135,7 @@ class TkTime(AutoscrollbarText):
 class TkTimeWithContext(Tk.Frame):
     def __init__(self, master):
         Tk.Frame.__init__(self, master)
-        self.tktime = TkTime(self, bg='black', fg='white', 
+        self.tktime = TkTime(self, bg='black', fg='white',
             insertbackground='white', parsed_color='blue',
             special_symbols=[NotPresent])
         self.tktime.pack(side='top', fill='both', expand=1)
@@ -144,7 +144,7 @@ class TkTimeWithContext(Tk.Frame):
         contexttext = Tk.Label(contextframe, text='Context')
         contexttext.pack(side='left', ipadx=0, ipady=0, padx=0, pady=0)
         self.context = TkTime(contextframe)
-        dispatcher.connect(self.context_selector, "selection made", 
+        dispatcher.connect(self.context_selector, "selection made",
             sender=self.context)
         dispatcher.connect(self.context_has_parses, "new segment parses",
             sender=self.context)

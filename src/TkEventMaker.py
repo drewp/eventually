@@ -39,7 +39,7 @@ class TkEventMaker(TkTimeWithContext):
     def __init__(self, master):
         TkTimeWithContext.__init__(self, master)
         dispatcher.connect(self.reset_bins, "new parses", sender=self.tktime)
-        dispatcher.connect(self.new_segment_parses, "new segment parses", 
+        dispatcher.connect(self.new_segment_parses, "new segment parses",
             sender=self.tktime)
         dispatcher.connect(self.draw_bins, "no parses", sender=self.tktime)
 

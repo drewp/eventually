@@ -270,8 +270,8 @@ def is_time(text):
             # we want to pick the time that's closer to noon
             # datetime.datetimes can be compared, datetime.times cannot,
             # so we'll make some datetimes on the same day
-            t1, t2 = (datetime.datetime(1, 1, 1, hour, minute, second), 
-                      datetime.datetime(1, 1, 1, (hour + 12) % 24, minute, 
+            t1, t2 = (datetime.datetime(1, 1, 1, hour, minute, second),
+                      datetime.datetime(1, 1, 1, (hour + 12) % 24, minute,
                                         second))
             noon = datetime.datetime(1, 1, 1, 12)
 
@@ -339,7 +339,7 @@ def is_range(text):
 def is_locpiece(text):
     text = text.lower()
     text = punc_re.sub('', text)
-    if text in ['room', 'rooms', 'building', 'buildings', 'street', 'st', 
+    if text in ['room', 'rooms', 'building', 'buildings', 'street', 'st',
                 'avenue', 'ave', 'floor', 'floors']:
         return text
 
@@ -355,7 +355,7 @@ def is_relative(text):
     text = text.lower()
     text = punc_re.sub('', text)
     if text in ['next', 'last', 'this', 'upcoming', 'previous', 'following',
-                'today', 'tonight', 'tomorrow', 'yesterday', 'morning', 
+                'today', 'tonight', 'tomorrow', 'yesterday', 'morning',
                 'afternoon', 'evening', 'night', 'now']:
         # normalize some of these
         text = text.replace('following', 'next')
@@ -426,7 +426,7 @@ class ParsedWord:
     def __str__(self):
         return self.originalword
     def __repr__(self):
-        return "<Node %r %d:%d %s>" % (self.originalword, self.linenum, 
+        return "<Node %r %d:%d %s>" % (self.originalword, self.linenum,
                                        self.wordnum, str(self.parses))
 
 class Segment(list):
@@ -444,7 +444,7 @@ class Segment(list):
         if charindices:
             return (first.charnum, last.charnum + len(str(last)))
         else:
-            return ((first.linenum + 1, first.colnum), 
+            return ((first.linenum + 1, first.colnum),
                     (last.linenum + 1, last.colnum + len(str(last))))
     def just_hints(self):
         """Returns whether this Segment is only hints and relative
@@ -475,7 +475,7 @@ class Segment(list):
         context = context or PartialTime.now()
 
         interpretable_parses = []
-        all_parses = cartesianproduct([node.parses for node in self], 
+        all_parses = cartesianproduct([node.parses for node in self],
                                       self.all_compatible)
         for interp in all_parses:
             # print "interp", interp
@@ -513,7 +513,7 @@ def sortedtimes(times_and_scores, context=None):
             days, secs = None, None # None is less than all numbers
         return (score, days, secs)
     
-    sorted_times_and_scores = sorted(times_and_scores, key=sortkey, 
+    sorted_times_and_scores = sorted(times_and_scores, key=sortkey,
         reverse=True)
 
     return sorted_times_and_scores
@@ -590,7 +590,7 @@ class SegmentInterpretation(tuple):
             if not 'minute' in self.parsedict:
                 self.parsedict['minute'] = 0
 
-        for expfunc in (self.expand_day_relatives, 
+        for expfunc in (self.expand_day_relatives,
                         self.expand_dayofweek_with_relatives,
                         self.expand_ordinal_dow_month):
             expansion = expfunc(context)
@@ -636,7 +636,7 @@ class SegmentInterpretation(tuple):
                 p = PartialTime(dayofweek=self.parsedict['dayofweek'])
 
                 pt_without_dow = PartialTime.from_object(without_dow)
-                relative_pt = p.relative_day_of_week(offset=offset, 
+                relative_pt = p.relative_day_of_week(offset=offset,
                     context=context)
 
                 return pt_without_dow.combine(relative_pt)
@@ -688,7 +688,7 @@ class SegmentInterpretation(tuple):
 
 # TODO mostly replaced with PartialTime.is_valid
 def pieces_compatible(piece1, piece2):
-    (parsetype1, val1) = piece1 
+    (parsetype1, val1) = piece1
     (parsetype2, val2) = piece2
     if parsetype1 == parsetype2:
         if 'hint' in parsetype1 or parsetype1 == 'int':

@@ -29,7 +29,7 @@ class PartialTime:
         self._hash_value = None
     def __repr__(self):
         return "PartialTime(" + \
-               ', '.join(["%s=%s" % (attr, getattr(self, attr)) 
+               ', '.join(["%s=%s" % (attr, getattr(self, attr))
                     for attr in partialtime_attrs
                     if getattr(self, attr) is not None]) + \
                ")"
@@ -69,7 +69,7 @@ class PartialTime:
 
     def __getattr__(self, attr):
         # operations on two datetime objects or a datetime and timedelta
-        if attr in ('__add__', '__radd__', '__sub__', '__rsub__', '__le__', 
+        if attr in ('__add__', '__radd__', '__sub__', '__rsub__', '__le__',
                     '__lt__', '__eq__', '__ne__', '__ge__', '__gt__'):
             def func(other, self=self, op=attr):
                 self_dt = self.as_datetime()

@@ -56,7 +56,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     for the summer" party!
 
     It's at my apartment, 203 Camp Street. And no, it's not a surprise, so you
-    don't need to be all secretive about it...""" : 
+    don't need to be all secretive about it...""" :
         datetime.datetime(2005, 5, 23, 20, 0),
 
     """Friday, 03 Jun 05        Flight DH 1640  
@@ -66,9 +66,9 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     Sunday, 05 Jun 05   Flight DH 1633  
     Depart:     Washington-Dulles, VA (IAD)     9:10 pm         
     Arrive:     Providence, RI (PVD)    10:28 pm""" :
-        (datetime.date(2005, 6, 3), datetime.time(17, 4), 
+        (datetime.date(2005, 6, 3), datetime.time(17, 4),
          datetime.time(18, 40),
-         datetime.date(2005, 6, 5), datetime.time(21, 10), 
+         datetime.date(2005, 6, 5), datetime.time(21, 10),
          datetime.time(22, 28)),
 
     """Dear Friends!
@@ -120,7 +120,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
 
     The Scientific Watercoolers are open to the public; anyone with an
     interest in scientific computing is invited to attend.  An informal
-    discussion will follow the presentation.""" : 
+    discussion will follow the presentation.""" :
         datetime.datetime(2005, 5, 31, 16, 0),
 
     "On 5/27/05, Robert Lynch <robert.ly...@gmail.com> wrote:" :
@@ -137,7 +137,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     """2005/6/16 night
     2005/6/17 morning, no night
     2005/6/18 night show
-    2005/6/19 14:00-23:00 show""" : 
+    2005/6/19 14:00-23:00 show""" :
         [datetime.date(2005, 6, 16),
          datetime.date(2005, 6, 17),
          datetime.date(2005, 6, 18),
@@ -167,7 +167,7 @@ student bands on Lincoln Field, and jazz music at Carrie Tower.""" :
     'now' : now,
     'tomorrow at 3pm' : datetime.datetime.combine(now.as_date() + datetime.timedelta(days=1), datetime.time(15, 0)),
     '3pm tomorrow' : datetime.datetime.combine(now.as_date() + datetime.timedelta(days=1), datetime.time(15, 0)),
-    '3pm today' : datetime.datetime.combine(now.as_date(), 
+    '3pm today' : datetime.datetime.combine(now.as_date(),
                                             datetime.time(15, 0)),
 
     '11/2000' : PartialTime(year=2000, month=11),
@@ -260,7 +260,7 @@ def run_tests(opts, test_cases):
                 if not opts.summary_only:
                     report_test(test_case, segments, [], [],
                                 msg="Parse found %s segment(s) but there "
-                                "should have been none." % len(segments), 
+                                "should have been none." % len(segments),
                                 filter_incomplete=True)
             continue
         
@@ -268,7 +268,7 @@ def run_tests(opts, test_cases):
         if not isinstance(expected_results, (list, tuple)):
             expected_results = [expected_results,]
         
-        expected_results = [PartialTime.from_object(res) 
+        expected_results = [PartialTime.from_object(res)
             for res in expected_results]
         unmatched_results = list(expected_results) # a copy that we'll modify
         
@@ -296,7 +296,7 @@ def run_tests(opts, test_cases):
     
     print "Summary:"
     print "Ran %d tests, %d failed." % (num_tests_run, num_tests_failed)
-    print "Ran %d segment tests, %d failed." % (num_segments_run, 
+    print "Ran %d segment tests, %d failed." % (num_segments_run,
                                                 num_segments_failed)
     # this tells us how well it is doing for the answers that it did find
     average = sum(ranks) / float(len(ranks))
